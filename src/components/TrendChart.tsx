@@ -14,8 +14,8 @@ export function TrendChart({ daily, requiredDaily }: { daily: DailyPerformance[]
   }));
 
   return (
-    <div className="rounded-2xl border border-bg-border bg-bg-card p-4 h-full flex flex-col overflow-hidden">
-      <h2 className="text-slate-300 text-xl font-bold uppercase tracking-wide mb-1 shrink-0">Daily Revenue Trend — Downtown</h2>
+    <div className="rounded-2xl border border-bg-border bg-bg-card p-3 md:p-4 h-full flex flex-col overflow-hidden">
+      <h2 className="text-slate-300 text-base md:text-xl font-bold uppercase tracking-wide mb-1 shrink-0">Daily Revenue Trend — Downtown</h2>
       <div className="flex-1 min-h-0">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>

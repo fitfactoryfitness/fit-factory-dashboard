@@ -8,22 +8,22 @@ import { fmtCurrency, fmtNumber } from "@/lib/format";
 export function PscCard({ psc, pscRev }: { psc: number | null; pscRev: number | null }) {
   const hasData = psc !== null || pscRev !== null;
   return (
-    <div className="rounded-2xl border border-bg-border bg-bg-card p-4 flex flex-col gap-2 h-full overflow-hidden">
+    <div className="rounded-2xl border border-bg-border bg-bg-card p-3 md:p-4 flex flex-col gap-1.5 md:gap-2 h-full overflow-hidden">
       <div className="flex items-center justify-between gap-2">
-        <span className="text-slate-300 text-base font-semibold uppercase tracking-wide truncate">PSC</span>
+        <span className="text-slate-300 text-sm md:text-base font-semibold uppercase tracking-wide truncate">PSC</span>
         {!hasData && (
-          <span className="shrink-0 text-sm font-bold px-2.5 py-1 rounded bg-slate-500/15 text-slate-400 whitespace-nowrap">
+          <span className="shrink-0 text-xs md:text-sm font-bold px-2 md:px-2.5 py-0.5 md:py-1 rounded bg-slate-500/15 text-slate-400 whitespace-nowrap">
             — NO DATA
           </span>
         )}
       </div>
       <div className="flex items-baseline gap-4 min-w-0">
         <div className="min-w-0">
-          <div className="text-4xl font-extrabold text-white leading-none truncate">{fmtNumber(psc)}</div>
+          <div className="text-2xl md:text-4xl font-extrabold text-white leading-none truncate">{fmtNumber(psc)}</div>
           <div className="text-xs text-slate-500 uppercase tracking-wide">Count</div>
         </div>
         <div className="min-w-0">
-          <div className="text-4xl font-extrabold text-emerald-400 leading-none truncate">{fmtCurrency(pscRev)}</div>
+          <div className="text-2xl md:text-4xl font-extrabold text-emerald-400 leading-none truncate">{fmtCurrency(pscRev)}</div>
           <div className="text-xs text-slate-500 uppercase tracking-wide">Revenue</div>
         </div>
       </div>
