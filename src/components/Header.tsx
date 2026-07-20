@@ -32,16 +32,16 @@ export function Header({
     <header className="flex items-center justify-between px-6 py-3 border-b border-bg-border bg-bg-panel">
       <div className="flex items-center gap-4">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo.svg" alt="Fit Factory" className="h-9 w-auto" />
-        <span className="text-slate-400 text-lg font-semibold">{monthLabel}</span>
+        <img src="/logo.svg" alt="Fit Factory" className="h-12 w-auto" />
+        <span className="text-slate-400 text-2xl font-semibold">{monthLabel}</span>
         {isMock && (
-          <span className="text-[11px] font-bold px-2 py-1 rounded bg-purple-500/20 text-purple-300 border border-purple-500/40">
+          <span className="text-sm font-bold px-2.5 py-1 rounded bg-purple-500/20 text-purple-300 border border-purple-500/40">
             MOCK DATA
           </span>
         )}
       </div>
       <div className="flex items-center gap-4">
-        <div className="text-right text-sm">
+        <div className="text-right text-lg">
           <div className={freshness.cls}>{freshness.label} · Updated {updatedTime}</div>
           <div className="text-slate-500">{now.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", timeZone: "America/Toronto" })}</div>
         </div>
