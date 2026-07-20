@@ -32,7 +32,7 @@ export function Header({
     <header className="flex items-center justify-between px-6 py-3 border-b border-bg-border bg-bg-panel">
       <div className="flex items-center gap-4">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo.svg" alt="Fit Factory" className="h-12 w-auto" />
+        <img src="/logo-white.png" alt="Fit Factory" className="h-12 w-auto" />
         <span className="text-slate-400 text-2xl font-semibold">{monthLabel}</span>
         {isMock && (
           <span className="text-sm font-bold px-2.5 py-1 rounded bg-purple-500/20 text-purple-300 border border-purple-500/40">
