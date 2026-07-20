@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 48" width="220" height="48">
+  <!-- PLACEHOLDER — replace public/logo.svg (or public/logo.png, updating the
+       <img> src in src/components/Header.tsx) with the real Fit Factory
+       logo once the file is available. This is not the real brand mark. -->
+  <text x="0" y="32" font-family="Arial, sans-serif" font-size="26" font-weight="900" fill="#ffffff">
+    FIT FACTORY <tspan fill="#34d399">DOWNTOWN</tspan>
+  </text>
+</svg>
