@@ -60,7 +60,7 @@ export function DashboardClient({ initial, debug }: { initial: { payload: Dashbo
       )}
 
       <main className="flex-1 min-h-0 p-3 grid grid-cols-12 grid-rows-12 gap-3">
-        <div className="col-span-12 row-span-4 min-h-0 overflow-hidden">
+        <div className="col-span-12 row-span-3 min-h-0 overflow-hidden">
           <RevenueHero
             summary={payload.summary}
             goalProgress={vm.goalProgress}
@@ -93,7 +93,7 @@ export function DashboardClient({ initial, debug }: { initial: { payload: Dashbo
           </div>
         </div>
 
-        <div className="col-span-12 row-span-2 min-h-0 overflow-hidden">
+        <div className="col-span-12 row-span-3 min-h-0 overflow-hidden">
           <TrendChart daily={vm.daily} requiredDaily={vm.requiredDaily} />
         </div>
 
