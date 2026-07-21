@@ -1,7 +1,7 @@
 "use client";
 
 import { MonthlySummary, MetricStatus } from "@/types/dashboard";
-import { fmtCurrency, fmtSigned, STATUS_COLORS } from "@/lib/format";
+import { fmtCurrency, STATUS_COLORS } from "@/lib/format";
 import { ProgressBar } from "./ProgressBar";
 
 export function RevenueHero({
@@ -9,16 +9,12 @@ export function RevenueHero({
   goalProgress,
   calendarProgressPct,
   remaining,
-  requiredDaily,
-  actualDaily,
   revenueStatus,
 }: {
   summary: MonthlySummary;
   goalProgress: number | null;
   calendarProgressPct: number;
   remaining: number | null;
-  requiredDaily: number | null;
-  actualDaily: number | null;
   revenueStatus: MetricStatus;
 }) {
   const pct = goalProgress !== null ? goalProgress * 100 : null;
@@ -39,38 +35,17 @@ export function RevenueHero({
         <span className="text-xl md:text-4xl text-slate-400 font-semibold shrink-0"> / {fmtCurrency(summary.revenueGoal)}</span>
       </div>
 
-      {/* The four supporting stats sit in a single full-width row above the
-          progress bar, not beside it — putting them next to the bar forced
-          a 2x2 grid crammed into a narrow column, which is what kept
-          clipping. A single row scales with the card's full width instead
-          of a fraction of it, so each stat gets more room at every zoom
-          level, and the bar underneath reads as one continuous element
-          instead of being squeezed to 2/3 width. */}
-      <div className="flex-1 min-h-0 flex flex-col justify-center gap-3 md:gap-4">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-6">
-          <Stat label="Projected month-end" value={fmtCurrency(summary.projectedRevenue)} />
-          <Stat label="Gap to goal" value={fmtSigned(summary.revenueGap, fmtCurrency)} negative={(summary.revenueGap ?? 0) < 0} />
-          <Stat label="Required / remaining day" value={fmtCurrency(requiredDaily !== null ? Math.ceil(requiredDaily) : null)} />
-          <Stat label="Actual avg / day" value={fmtCurrency(actualDaily)} />
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <ProgressBar currentPct={pct} expectedPct={calendarProgressPct} status={revenueStatus} height="h-4 md:h-6" />
-          <div className="flex justify-between text-sm md:text-lg">
-            <span className="text-slate-300 font-semibold">{pct !== null ? `${pct.toFixed(1)}% achieved` : "—"}</span>
-            <span className="text-slate-400">{calendarProgressPct.toFixed(1)}% of month elapsed</span>
-          </div>
+      {/* The four supporting stats (Projected, Gap, Required/day, Actual/day)
+          now live in their own card in the KPI row next to Trials/CP to
+          Trials (see RevenueMetricsCard) — keeping this card to just the big
+          number and the progress bar. */}
+      <div className="flex-1 min-h-0 flex flex-col justify-center gap-2">
+        <ProgressBar currentPct={pct} expectedPct={calendarProgressPct} status={revenueStatus} height="h-4 md:h-6" />
+        <div className="flex justify-between text-sm md:text-lg">
+          <span className="text-slate-300 font-semibold">{pct !== null ? `${pct.toFixed(1)}% achieved` : "—"}</span>
+          <span className="text-slate-400">{calendarProgressPct.toFixed(1)}% of month elapsed</span>
         </div>
       </div>
-    </div>
-  );
-}
-
-function Stat({ label, value, negative }: { label: string; value: string; negative?: boolean }) {
-  return (
-    <div className="min-w-0">
-      <div className="text-slate-500 uppercase text-xs md:text-sm tracking-wide truncate">{label}</div>
-      <div className={`text-xl md:text-3xl font-bold truncate ${negative ? "text-red-400" : "text-white"}`}>{value}</div>
     </div>
   );
 }
