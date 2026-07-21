@@ -44,12 +44,19 @@ export function DashboardClient({ initial, debug }: { initial: { payload: Dashbo
     .toLocaleDateString("en-US", { month: "long", year: "numeric", timeZone: payload.timezone })
     .toUpperCase();
 
-  // Layout is mobile-first by default (single stacked column, page scrolls
-  // normally — a phone can't show a full 1920x1080 TV grid at a readable
-  // size). At the `md` breakpoint and up, the original fixed 12x12 TV grid
-  // takes over, filling the viewport with no scrolling, exactly as before.
+  // Layout is content-driven height everywhere, on every breakpoint — a
+  // fixed h-screen grid with hard-clipped rows only works if the page fills
+  // an actual fullscreen kiosk display with no browser chrome. In a normal
+  // browser window (tabs, bookmarks bar, URL bar all eating into the real
+  // viewport height) that same fixed grid silently clipped card content at
+  // 100% zoom. Letting the page scroll if it doesn't fully fit is a much
+  // safer failure mode than hiding numbers — and on an actual TV/kiosk at a
+  // reasonable resolution, this should rarely need any scrolling at all.
+  // Columns still switch from a single stacked mobile column to the wider
+  // multi-column desktop layout at the `md` breakpoint; only row heights are
+  // no longer forced to fractions of the viewport.
   return (
-    <div className="min-h-screen w-full flex flex-col md:h-screen md:overflow-hidden">
+    <div className="min-h-screen w-full flex flex-col">
       <Header
         monthLabel={monthLabel}
         generatedAt={payload.generatedAt}
@@ -63,8 +70,8 @@ export function DashboardClient({ initial, debug }: { initial: { payload: Dashbo
         </div>
       )}
 
-      <main className="flex-1 md:min-h-0 p-3 grid grid-cols-1 gap-3 md:grid-cols-12 md:grid-rows-12">
-        <div className="md:col-span-12 md:row-span-4 md:min-h-0 md:overflow-hidden">
+      <main className="flex-1 p-3 grid grid-cols-1 gap-3 md:grid-cols-12">
+        <div className="md:col-span-12">
           <RevenueHero
             summary={payload.summary}
             goalProgress={vm.goalProgress}
@@ -83,26 +90,26 @@ export function DashboardClient({ initial, debug }: { initial: { payload: Dashbo
             product feedback (still tracked in the data, just not displayed
             as their own cards). On mobile these simply stack full-width,
             one after another. */}
-        <div className="md:col-span-4 md:row-span-3 md:min-h-0 md:overflow-hidden">
+        <div className="md:col-span-4">
           <KpiCard kpi={vm.kpis[0]} />
         </div>
-        <div className="md:col-span-4 md:row-span-3 md:min-h-0 md:overflow-hidden">
+        <div className="md:col-span-4">
           <KpiCard kpi={vm.kpis[1]} />
         </div>
-        <div className="md:col-span-4 md:row-span-3 md:min-h-0 md:overflow-hidden grid grid-cols-1 gap-3 md:grid-rows-2 md:gap-2">
-          <div className="md:min-h-0 md:overflow-hidden">
+        <div className="md:col-span-4 grid grid-cols-1 gap-3 md:grid-rows-2 md:gap-2">
+          <div>
             <KpiCard kpi={vm.kpis[2]} />
           </div>
-          <div className="md:min-h-0 md:overflow-hidden">
+          <div>
             <PscCard psc={payload.summary.pscMTD} pscRev={payload.summary.pscRevMTD} />
           </div>
         </div>
 
-        <div className="md:col-span-12 md:row-span-3 md:min-h-0 md:overflow-hidden h-[320px] md:h-auto">
+        <div className="md:col-span-12 h-[320px] md:h-[380px]">
           <TrendChart daily={vm.daily} requiredDaily={vm.requiredDaily} />
         </div>
 
-        <div className="md:col-span-12 md:row-span-1 md:min-h-0 md:overflow-hidden">
+        <div className="md:col-span-12">
           <MrrForecastStrip
             plus1={payload.summary.mrrForecast.plus1}
             plus2={payload.summary.mrrForecast.plus2}
@@ -110,7 +117,7 @@ export function DashboardClient({ initial, debug }: { initial: { payload: Dashbo
           />
         </div>
 
-        <div className="md:col-span-12 md:row-span-1 md:min-h-0 md:overflow-hidden flex items-center pb-3 md:pb-0">
+        <div className="md:col-span-12 flex items-center pb-3 md:pb-0">
           {payload.summary.midtown && <MidtownStrip midtown={payload.summary.midtown} />}
         </div>
       </main>
