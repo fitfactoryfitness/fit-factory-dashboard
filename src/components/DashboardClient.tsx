@@ -14,6 +14,10 @@ import { TrendChart } from "./TrendChart";
 import { MidtownStrip } from "./MidtownStrip";
 import { DebugPanel } from "./DebugPanel";
 
+// Toggle to bring the Daily Revenue Trend card back — kept in the code (not
+// deleted) per product request, just hidden from render for now.
+const SHOW_TREND_CHART = false;
+
 async function fetchDashboard(): Promise<{ payload: DashboardPayload; error: string | null }> {
   const res = await fetch("/api/dashboard", { cache: "no-store" });
   const json = await res.json();
@@ -115,9 +119,11 @@ export function DashboardClient({ initial, debug }: { initial: { payload: Dashbo
           </div>
         </div>
 
-        <div className="flex-1 min-h-[220px] md:min-h-0">
-          <TrendChart daily={vm.daily} requiredDaily={vm.requiredDaily} />
-        </div>
+        {SHOW_TREND_CHART && (
+          <div className="flex-1 min-h-[220px] md:min-h-0">
+            <TrendChart daily={vm.daily} requiredDaily={vm.requiredDaily} />
+          </div>
+        )}
 
         <div className="shrink-0">
           <MrrForecastStrip
