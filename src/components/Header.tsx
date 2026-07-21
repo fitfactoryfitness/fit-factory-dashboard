@@ -34,9 +34,9 @@ export function Header({
   const updatedTime = new Date(generatedAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZone: "America/Toronto" });
 
   return (
-    <header className="flex items-center justify-between flex-wrap gap-2 px-4 md:px-6 py-3 border-b border-bg-border bg-bg-panel">
+    <header className="flex items-center justify-between flex-wrap gap-2 px-4 md:px-6 py-2 md:py-3 border-b border-bg-border bg-bg-panel">
       <div className="flex items-center gap-3 md:gap-4 flex-wrap">
-        <Image src={logoWhite} alt="Fit Factory" className="h-9 md:h-12 w-auto" priority />
+        <Image src={logoWhite} alt="Fit Factory" className="h-14 md:h-20 w-auto" priority />
         <span className="text-slate-400 text-lg md:text-2xl font-semibold">{monthLabel}</span>
         {isMock && (
           <span className="text-xs md:text-sm font-bold px-2 md:px-2.5 py-0.5 md:py-1 rounded bg-purple-500/20 text-purple-300 border border-purple-500/40">

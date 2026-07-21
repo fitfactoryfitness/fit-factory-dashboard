@@ -39,12 +39,12 @@ export function RevenueHero({
         <span className="text-xl md:text-4xl text-slate-400 font-semibold shrink-0"> / {fmtCurrency(summary.revenueGoal)}</span>
       </div>
 
-      {/* Progress bar + achieved/elapsed take the left ~75%; the four
-          supporting stats stack in a column on the right ~25% instead of
-          running as a full-width row beneath — this keeps the card's total
-          height compact enough to fit its grid row without clipping. */}
+      {/* Progress bar + achieved/elapsed take the left ~2/3; the four
+          supporting stats sit in a 2x2 grid on the right ~1/3 instead of a
+          full-width row or single stacked column — both of those overflowed
+          the card's height at this font size. */}
       <div className="flex-1 min-h-0 flex flex-col md:flex-row gap-3 md:gap-6">
-        <div className="md:w-3/4 flex flex-col justify-center gap-2 min-w-0 shrink-0">
+        <div className="md:w-2/3 flex flex-col justify-center gap-2 min-w-0 shrink-0">
           <ProgressBar currentPct={pct} expectedPct={calendarProgressPct} status={revenueStatus} height="h-4 md:h-6" />
           <div className="flex justify-between text-sm md:text-lg">
             <span className="text-slate-300 font-semibold">{pct !== null ? `${pct.toFixed(1)}% achieved` : "—"}</span>
@@ -52,7 +52,7 @@ export function RevenueHero({
           </div>
         </div>
 
-        <div className="md:w-1/4 grid grid-cols-2 md:grid-cols-1 gap-3 md:gap-2 min-w-0">
+        <div className="md:w-1/3 grid grid-cols-2 gap-3 md:gap-x-6 md:gap-y-3 content-center min-w-0">
           <Stat label="Projected month-end" value={fmtCurrency(summary.projectedRevenue)} />
           <Stat label="Gap to goal" value={fmtSigned(summary.revenueGap, fmtCurrency)} negative={(summary.revenueGap ?? 0) < 0} />
           <Stat label="Required / remaining day" value={fmtCurrency(requiredDaily !== null ? Math.ceil(requiredDaily) : null)} />
