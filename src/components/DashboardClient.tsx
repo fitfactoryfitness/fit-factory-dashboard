@@ -16,7 +16,7 @@ import { DebugPanel } from "./DebugPanel";
 
 // Toggle to bring the Daily Revenue Trend card back — kept in the code (not
 // deleted) per product request, just hidden from render for now.
-const SHOW_TREND_CHART = false;
+const SHOW_TREND_CHART = true;
 
 async function fetchDashboard(): Promise<{ payload: DashboardPayload; error: string | null }> {
   const res = await fetch("/api/dashboard", { cache: "no-store" });
