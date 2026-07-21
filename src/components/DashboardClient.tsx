@@ -64,7 +64,7 @@ export function DashboardClient({ initial, debug }: { initial: { payload: Dashbo
       )}
 
       <main className="flex-1 md:min-h-0 p-3 grid grid-cols-1 gap-3 md:grid-cols-12 md:grid-rows-12">
-        <div className="md:col-span-12 md:row-span-3 md:min-h-0 md:overflow-hidden">
+        <div className="md:col-span-12 md:row-span-4 md:min-h-0 md:overflow-hidden">
           <RevenueHero
             summary={payload.summary}
             goalProgress={vm.goalProgress}
@@ -83,13 +83,13 @@ export function DashboardClient({ initial, debug }: { initial: { payload: Dashbo
             product feedback (still tracked in the data, just not displayed
             as their own cards). On mobile these simply stack full-width,
             one after another. */}
-        <div className="md:col-span-4 md:row-span-4 md:min-h-0 md:overflow-hidden">
+        <div className="md:col-span-4 md:row-span-3 md:min-h-0 md:overflow-hidden">
           <KpiCard kpi={vm.kpis[0]} />
         </div>
-        <div className="md:col-span-4 md:row-span-4 md:min-h-0 md:overflow-hidden">
+        <div className="md:col-span-4 md:row-span-3 md:min-h-0 md:overflow-hidden">
           <KpiCard kpi={vm.kpis[1]} />
         </div>
-        <div className="md:col-span-4 md:row-span-4 md:min-h-0 md:overflow-hidden grid grid-cols-1 gap-3 md:grid-rows-2 md:gap-2">
+        <div className="md:col-span-4 md:row-span-3 md:min-h-0 md:overflow-hidden grid grid-cols-1 gap-3 md:grid-rows-2 md:gap-2">
           <div className="md:min-h-0 md:overflow-hidden">
             <KpiCard kpi={vm.kpis[2]} />
           </div>

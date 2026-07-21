@@ -39,20 +39,25 @@ export function RevenueHero({
         <span className="text-xl md:text-4xl text-slate-400 font-semibold shrink-0"> / {fmtCurrency(summary.revenueGoal)}</span>
       </div>
 
-      <div className="shrink-0">
-        <ProgressBar currentPct={pct} expectedPct={calendarProgressPct} status={revenueStatus} height="h-4 md:h-6" />
-      </div>
+      {/* Progress bar + achieved/elapsed take the left ~75%; the four
+          supporting stats stack in a column on the right ~25% instead of
+          running as a full-width row beneath — this keeps the card's total
+          height compact enough to fit its grid row without clipping. */}
+      <div className="flex-1 min-h-0 flex flex-col md:flex-row gap-3 md:gap-6">
+        <div className="md:w-3/4 flex flex-col justify-center gap-2 min-w-0 shrink-0">
+          <ProgressBar currentPct={pct} expectedPct={calendarProgressPct} status={revenueStatus} height="h-4 md:h-6" />
+          <div className="flex justify-between text-sm md:text-lg">
+            <span className="text-slate-300 font-semibold">{pct !== null ? `${pct.toFixed(1)}% achieved` : "—"}</span>
+            <span className="text-slate-400">{calendarProgressPct.toFixed(1)}% of month elapsed</span>
+          </div>
+        </div>
 
-      <div className="flex justify-between text-sm md:text-lg shrink-0">
-        <span className="text-slate-300 font-semibold">{pct !== null ? `${pct.toFixed(1)}% achieved` : "—"}</span>
-        <span className="text-slate-400">{calendarProgressPct.toFixed(1)}% of month elapsed</span>
-      </div>
-
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-auto text-base md:text-lg shrink-0">
-        <Stat label="Projected month-end" value={fmtCurrency(summary.projectedRevenue)} />
-        <Stat label="Gap to goal" value={fmtSigned(summary.revenueGap, fmtCurrency)} negative={(summary.revenueGap ?? 0) < 0} />
-        <Stat label="Required / remaining day" value={fmtCurrency(requiredDaily !== null ? Math.ceil(requiredDaily) : null)} />
-        <Stat label="Actual avg / day" value={fmtCurrency(actualDaily)} />
+        <div className="md:w-1/4 grid grid-cols-2 md:grid-cols-1 gap-3 md:gap-2 min-w-0">
+          <Stat label="Projected month-end" value={fmtCurrency(summary.projectedRevenue)} />
+          <Stat label="Gap to goal" value={fmtSigned(summary.revenueGap, fmtCurrency)} negative={(summary.revenueGap ?? 0) < 0} />
+          <Stat label="Required / remaining day" value={fmtCurrency(requiredDaily !== null ? Math.ceil(requiredDaily) : null)} />
+          <Stat label="Actual avg / day" value={fmtCurrency(actualDaily)} />
+        </div>
       </div>
     </div>
   );

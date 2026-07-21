@@ -2,6 +2,11 @@
 
 import { FRESHNESS_THRESHOLDS_MINUTES } from "@/config/thresholds";
 import { useEffect, useState } from "react";
+import Image from "next/image";
+// Imported directly from src/ (not public/) as a build-time asset — this
+// works regardless of location in the project, unlike a plain <img src="/...">
+// URL, which only resolves files actually placed in the public/ folder.
+import logoWhite from "@/logo-white.png";
 
 function freshnessLabel(generatedAt: string): { label: string; cls: string } {
   const ageMin = (Date.now() - new Date(generatedAt).getTime()) / 60000;
@@ -31,8 +36,7 @@ export function Header({
   return (
     <header className="flex items-center justify-between flex-wrap gap-2 px-4 md:px-6 py-3 border-b border-bg-border bg-bg-panel">
       <div className="flex items-center gap-3 md:gap-4 flex-wrap">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo-white.png" alt="Fit Factory" className="h-9 md:h-12 w-auto" />
+        <Image src={logoWhite} alt="Fit Factory" className="h-9 md:h-12 w-auto" priority />
         <span className="text-slate-400 text-lg md:text-2xl font-semibold">{monthLabel}</span>
         {isMock && (
           <span className="text-xs md:text-sm font-bold px-2 md:px-2.5 py-0.5 md:py-1 rounded bg-purple-500/20 text-purple-300 border border-purple-500/40">
