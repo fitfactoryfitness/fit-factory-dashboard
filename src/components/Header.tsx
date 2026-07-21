@@ -49,16 +49,19 @@ export function Header({
         )}
       </div>
 
-      {/* Height-capped, width auto (not the other way around): the source
-          file has significant transparent padding baked in around the
-          visible mark, so letting width drive sizing (e.g. via min-width)
-          makes the whole file — padding included — balloon in height,
-          which is what broke the header layout previously. If this still
-          reads as "too small," the fix is re-cropping the source PNG to
-          remove that padding, not further CSS sizing tricks. Kept smaller
-          here (h-8/h-12) than earlier since the whole header bar is now
-          shorter overall. */}
-      <Image src={logoWhite} alt="Fit Factory" className="h-8 md:h-12 w-auto justify-self-center" priority />
+      {/* The source PNG has a lot of transparent padding baked in around the
+          visible "FIT FACTORY" mark, so sizing the <Image> directly to the
+          navbar's height (h-8/h-12) renders the mark itself much smaller
+          than that box — most of the box is invisible padding. Fix: keep
+          the outer box fixed at the navbar height (so the navbar itself
+          never grows), but render the image ~3.5x bigger than that box and
+          clip the overflow — this crops the padding away visually instead
+          of shrinking the mark to fit it. If the mark ends up off-center
+          after a real logo update, adjust the scale factor below rather
+          than the outer box height. */}
+      <div className="h-8 md:h-12 overflow-hidden flex items-center justify-center justify-self-center">
+        <Image src={logoWhite} alt="Fit Factory" className="h-28 md:h-40 w-auto shrink-0" priority />
+      </div>
 
       <div className="flex items-center justify-end gap-4 min-w-0">
         <div className="text-right text-xs md:text-base">
