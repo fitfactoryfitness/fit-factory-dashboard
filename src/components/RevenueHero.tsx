@@ -39,24 +39,27 @@ export function RevenueHero({
         <span className="text-xl md:text-4xl text-slate-400 font-semibold shrink-0"> / {fmtCurrency(summary.revenueGoal)}</span>
       </div>
 
-      {/* Progress bar + achieved/elapsed take the left ~2/3; the four
-          supporting stats sit in a 2x2 grid on the right ~1/3 instead of a
-          full-width row or single stacked column — both of those overflowed
-          the card's height at this font size. */}
-      <div className="flex-1 min-h-0 flex flex-col md:flex-row gap-3 md:gap-6">
-        <div className="md:w-2/3 flex flex-col justify-center gap-2 min-w-0 shrink-0">
+      {/* The four supporting stats sit in a single full-width row above the
+          progress bar, not beside it — putting them next to the bar forced
+          a 2x2 grid crammed into a narrow column, which is what kept
+          clipping. A single row scales with the card's full width instead
+          of a fraction of it, so each stat gets more room at every zoom
+          level, and the bar underneath reads as one continuous element
+          instead of being squeezed to 2/3 width. */}
+      <div className="flex-1 min-h-0 flex flex-col justify-center gap-3 md:gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-6">
+          <Stat label="Projected month-end" value={fmtCurrency(summary.projectedRevenue)} />
+          <Stat label="Gap to goal" value={fmtSigned(summary.revenueGap, fmtCurrency)} negative={(summary.revenueGap ?? 0) < 0} />
+          <Stat label="Required / remaining day" value={fmtCurrency(requiredDaily !== null ? Math.ceil(requiredDaily) : null)} />
+          <Stat label="Actual avg / day" value={fmtCurrency(actualDaily)} />
+        </div>
+
+        <div className="flex flex-col gap-2">
           <ProgressBar currentPct={pct} expectedPct={calendarProgressPct} status={revenueStatus} height="h-4 md:h-6" />
           <div className="flex justify-between text-sm md:text-lg">
             <span className="text-slate-300 font-semibold">{pct !== null ? `${pct.toFixed(1)}% achieved` : "—"}</span>
             <span className="text-slate-400">{calendarProgressPct.toFixed(1)}% of month elapsed</span>
           </div>
-        </div>
-
-        <div className="md:w-1/3 grid grid-cols-2 gap-3 md:gap-x-6 md:gap-y-3 content-center min-w-0">
-          <Stat label="Projected month-end" value={fmtCurrency(summary.projectedRevenue)} />
-          <Stat label="Gap to goal" value={fmtSigned(summary.revenueGap, fmtCurrency)} negative={(summary.revenueGap ?? 0) < 0} />
-          <Stat label="Required / remaining day" value={fmtCurrency(requiredDaily !== null ? Math.ceil(requiredDaily) : null)} />
-          <Stat label="Actual avg / day" value={fmtCurrency(actualDaily)} />
         </div>
       </div>
     </div>
@@ -67,7 +70,7 @@ function Stat({ label, value, negative }: { label: string; value: string; negati
   return (
     <div className="min-w-0">
       <div className="text-slate-500 uppercase text-xs md:text-sm tracking-wide truncate">{label}</div>
-      <div className={`text-lg md:text-2xl font-bold truncate ${negative ? "text-red-400" : "text-white"}`}>{value}</div>
+      <div className={`text-xl md:text-3xl font-bold truncate ${negative ? "text-red-400" : "text-white"}`}>{value}</div>
     </div>
   );
 }

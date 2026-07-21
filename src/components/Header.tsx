@@ -34,24 +34,31 @@ export function Header({
   const updatedTime = new Date(generatedAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZone: "America/Toronto" });
 
   return (
-    <header className="flex items-center justify-between flex-wrap gap-2 px-4 md:px-6 py-2 md:py-3 border-b border-bg-border bg-bg-panel">
-      <div className="flex items-center gap-3 md:gap-4 flex-wrap">
-        {/* Height-capped, width auto (not the other way around): the source
-            file has significant transparent padding baked in around the
-            visible mark, so letting width drive sizing (e.g. via min-width)
-            makes the whole file — padding included — balloon in height,
-            which is what broke the header layout. If this still reads as
-            "too small," the fix is re-cropping the source PNG to remove
-            that padding, not further CSS sizing tricks. */}
-        <Image src={logoWhite} alt="Fit Factory" className="h-16 md:h-24 w-auto" priority />
-        <span className="text-slate-400 text-lg md:text-2xl font-semibold">{monthLabel}</span>
+    // Three-column grid instead of flex justify-between: with justify-between,
+    // the logo's actual on-screen position shifts depending on how wide the
+    // left (month/badge) and right (freshness/date) blocks are, so it only
+    // looks "centered" by coincidence. A grid with a fixed center column keeps
+    // the logo genuinely centered regardless of the text length on either side.
+    <header className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 px-4 md:px-6 py-2 md:py-3 border-b border-bg-border bg-bg-panel">
+      <div className="flex items-center gap-2 md:gap-3 flex-wrap min-w-0">
+        <span className="text-slate-400 text-lg md:text-2xl font-semibold whitespace-nowrap">{monthLabel}</span>
         {isMock && (
-          <span className="text-xs md:text-sm font-bold px-2 md:px-2.5 py-0.5 md:py-1 rounded bg-purple-500/20 text-purple-300 border border-purple-500/40">
+          <span className="text-xs md:text-sm font-bold px-2 md:px-2.5 py-0.5 md:py-1 rounded bg-purple-500/20 text-purple-300 border border-purple-500/40 whitespace-nowrap">
             MOCK DATA
           </span>
         )}
       </div>
-      <div className="flex items-center gap-4">
+
+      {/* Height-capped, width auto (not the other way around): the source
+          file has significant transparent padding baked in around the
+          visible mark, so letting width drive sizing (e.g. via min-width)
+          makes the whole file — padding included — balloon in height,
+          which is what broke the header layout previously. If this still
+          reads as "too small," the fix is re-cropping the source PNG to
+          remove that padding, not further CSS sizing tricks. */}
+      <Image src={logoWhite} alt="Fit Factory" className="h-16 md:h-24 w-auto justify-self-center" priority />
+
+      <div className="flex items-center justify-end gap-4 min-w-0">
         <div className="text-right text-sm md:text-lg">
           <div className={freshness.cls}>{freshness.label} · Updated {updatedTime}</div>
           <div className="text-slate-500">{now.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", timeZone: "America/Toronto" })}</div>
