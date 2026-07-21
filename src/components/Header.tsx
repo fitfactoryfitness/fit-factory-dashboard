@@ -36,7 +36,14 @@ export function Header({
   return (
     <header className="flex items-center justify-between flex-wrap gap-2 px-4 md:px-6 py-2 md:py-3 border-b border-bg-border bg-bg-panel">
       <div className="flex items-center gap-3 md:gap-4 flex-wrap">
-        <Image src={logoWhite} alt="Fit Factory" className="h-auto w-auto min-w-[140px] md:min-w-[300px]" priority />
+        {/* Height-capped, width auto (not the other way around): the source
+            file has significant transparent padding baked in around the
+            visible mark, so letting width drive sizing (e.g. via min-width)
+            makes the whole file — padding included — balloon in height,
+            which is what broke the header layout. If this still reads as
+            "too small," the fix is re-cropping the source PNG to remove
+            that padding, not further CSS sizing tricks. */}
+        <Image src={logoWhite} alt="Fit Factory" className="h-16 md:h-24 w-auto" priority />
         <span className="text-slate-400 text-lg md:text-2xl font-semibold">{monthLabel}</span>
         {isMock && (
           <span className="text-xs md:text-sm font-bold px-2 md:px-2.5 py-0.5 md:py-1 rounded bg-purple-500/20 text-purple-300 border border-purple-500/40">
