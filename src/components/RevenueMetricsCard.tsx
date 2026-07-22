@@ -20,7 +20,7 @@ export function RevenueMetricsCard({
   return (
     <div className="rounded-2xl border border-bg-border bg-bg-card p-2.5 md:p-3 flex flex-col h-full overflow-hidden">
       <span className="text-slate-300 text-sm md:text-base font-semibold uppercase tracking-wide truncate mb-1">Revenue Pace</span>
-      <div className="flex-1 grid grid-cols-2 gap-x-3 gap-y-1.5 md:gap-x-4 md:gap-y-2 content-center">
+      <div className="flex-1 grid grid-cols-2 gap-x-4 md:gap-x-6 content-between py-1">
         <Stat label="Projected month-end" value={fmtCurrency(projectedRevenue)} />
         <Stat label="Gap to goal" value={fmtSigned(revenueGap, fmtCurrency)} negative={(revenueGap ?? 0) < 0} />
         <Stat label="Required / day" value={fmtCurrency(requiredDaily !== null ? Math.ceil(requiredDaily) : null)} />
@@ -34,7 +34,7 @@ function Stat({ label, value, negative }: { label: string; value: string; negati
   return (
     <div className="min-w-0">
       <div className="text-slate-500 uppercase text-xs md:text-base tracking-wide truncate">{label}</div>
-      <div className={`text-2xl md:text-4xl font-bold truncate ${negative ? "text-red-400" : "text-white"}`}>{value}</div>
+      <div className={`text-3xl md:text-5xl font-bold truncate ${negative ? "text-red-400" : "text-white"}`}>{value}</div>
     </div>
   );
 }
