@@ -83,6 +83,7 @@ export function buildMonthlySummaryAndDaily(params: {
 
   const trialsTarget = resolveTarget("trials", null);
   const cpToTrialsTarget = resolveTarget("cpToTrials", null);
+  const newMembershipsTarget = resolveTarget("newMemberships", null);
 
   // Projected Revenue (I5:J5) and Gap to Goal (I6:J6) are read directly via
   // label search in parseSummary — not recalculated here.
@@ -106,6 +107,7 @@ export function buildMonthlySummaryAndDaily(params: {
     cpToTrialsTarget,
     totalSalesMTD,
     newMembershipsMTD,
+    newMembershipsTarget,
     utilizationMTD,
     terminationsMTD,
     revenueLostMTD,

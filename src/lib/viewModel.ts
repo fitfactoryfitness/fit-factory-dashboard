@@ -80,7 +80,14 @@ export function buildViewModel(payload: DashboardPayload, now: Date = new Date()
   const kpis: KpiCardData[] = [
     kpi("trials", "Trials", summary.trialsMTD, summary.trialsTarget.value, summary.trialsTarget.source, "count"),
     kpi("cpToTrials", "CP to Trials", summary.cpToTrialsMTD, summary.cpToTrialsTarget.value, summary.cpToTrialsTarget.source, "count"),
-    kpi("newMemberships", "New Memberships", summary.newMembershipsMTD, null, "manual", "count"),
+    kpi(
+      "newMemberships",
+      "New Memberships",
+      summary.newMembershipsMTD,
+      summary.newMembershipsTarget.value,
+      summary.newMembershipsTarget.source,
+      "count"
+    ),
   ];
 
   const priorities = generatePriorities({ summary, calendarProgress: cal.calendarProgress, remainingDays: cal.remainingDays });

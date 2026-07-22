@@ -54,6 +54,7 @@ export type MonthlySummary = {
 
   totalSalesMTD: number | null;
   newMembershipsMTD: number | null;
+  newMembershipsTarget: MetricTarget;
   utilizationMTD: number | null;
   terminationsMTD: number | null;
   revenueLostMTD: number | null;

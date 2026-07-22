@@ -23,6 +23,12 @@ export const FALLBACK_TARGETS: Record<string, MetricTarget> = {
     value: 30,
     note: "No CP-to-Trials target cell found in the spreadsheet. Using business rule supplied by ownership (30/month) until a spreadsheet target is identified.",
   },
+  newMemberships: {
+    metricId: "newMemberships",
+    source: "fallback",
+    value: 35,
+    note: "No New Memberships target cell found in the spreadsheet. Using business rule supplied by ownership (35/month) until a spreadsheet target is identified.",
+  },
 };
 
 // If a spreadsheet-provided target is later found (e.g. a "TRIALS GOAL" cell
