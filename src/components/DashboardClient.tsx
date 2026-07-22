@@ -120,7 +120,17 @@ export function DashboardClient({ initial, debug }: { initial: { payload: Dashbo
         </div>
 
         {SHOW_TREND_CHART && (
-          <div className="flex-1 min-h-[220px] md:min-h-0">
+          // Mobile gets a fixed pixel height (h-[280px]), not flex-1: Recharts'
+          // ResponsiveContainer needs a parent with a real, already-resolved
+          // height at mount time. On mobile the page has no height-constrained
+          // ancestor (min-h-screen, scrolls, no fixed viewport), so a flex-1
+          // item's height comes from the browser's flex layout pass rather
+          // than an explicit value, and ResponsiveContainer was measuring 0
+          // and never recovering — that's why the chart was invisible on
+          // phones. Desktop keeps flex-1 (fills the remaining fixed-viewport
+          // space), since there h-screen on the outer container gives every
+          // flex ancestor a definite height to grow into.
+          <div className="h-[280px] md:h-auto md:flex-1 md:min-h-0">
             <TrendChart daily={vm.daily} requiredDaily={vm.requiredDaily} />
           </div>
         )}
