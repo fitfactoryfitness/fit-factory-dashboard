@@ -8,7 +8,7 @@ import { fmtCurrency, fmtNumber } from "@/lib/format";
 export function PscCard({ psc, pscRev }: { psc: number | null; pscRev: number | null }) {
   const hasData = psc !== null || pscRev !== null;
   return (
-    <div className="rounded-2xl border border-bg-border bg-bg-card p-3 md:p-4 flex flex-col gap-1.5 md:gap-2 h-full overflow-hidden">
+    <div className="rounded-2xl border border-bg-border bg-bg-card p-2 md:p-2.5 flex flex-col gap-1 md:gap-1.5 h-full overflow-hidden">
       <div className="flex items-center justify-between gap-2">
         <span className="text-slate-300 text-sm md:text-base font-semibold uppercase tracking-wide truncate">PSC</span>
         {!hasData && (

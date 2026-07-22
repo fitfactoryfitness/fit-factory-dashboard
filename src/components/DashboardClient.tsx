@@ -76,7 +76,7 @@ export function DashboardClient({ initial, debug }: { initial: { payload: Dashbo
         </div>
       )}
 
-      <main className="flex-1 min-h-0 p-3 flex flex-col gap-3 md:overflow-hidden">
+      <main className="flex-1 min-h-0 p-3 flex flex-col gap-3 md:gap-2 md:overflow-hidden">
         <div className="shrink-0">
           <RevenueHero
             summary={payload.summary}
@@ -94,7 +94,7 @@ export function DashboardClient({ initial, debug }: { initial: { payload: Dashbo
             Terminations cards were removed per product feedback (still
             tracked in the data, just not displayed as their own cards). On
             mobile these simply stack full-width, one after another. */}
-        <div className="shrink-0 grid grid-cols-1 gap-3 md:grid-cols-4">
+        <div className="shrink-0 grid grid-cols-1 gap-3 md:grid-cols-4 md:gap-2">
           <div>
             <KpiCard kpi={vm.kpis[0]} />
           </div>
@@ -109,7 +109,7 @@ export function DashboardClient({ initial, debug }: { initial: { payload: Dashbo
               actualDaily={vm.actualDaily}
             />
           </div>
-          <div className="grid grid-cols-1 gap-3 md:grid-rows-2 md:gap-2">
+          <div className="grid grid-cols-1 gap-3 md:grid-rows-2 md:gap-1.5">
             <div>
               <KpiCard kpi={vm.kpis[2]} />
             </div>

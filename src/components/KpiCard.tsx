@@ -40,7 +40,7 @@ export function KpiCard({ kpi }: { kpi: KpiCardData }) {
   const expectedPct = kpi.target && kpi.target > 0 && kpi.expectedByToday !== null ? (kpi.expectedByToday / kpi.target) * 100 : null;
 
   return (
-    <div className={`rounded-2xl border ${colors.border} bg-bg-card p-3 md:p-4 flex flex-col gap-1.5 md:gap-2 h-full overflow-hidden`}>
+    <div className={`rounded-2xl border ${colors.border} bg-bg-card p-2.5 md:p-3 flex flex-col gap-1 md:gap-1.5 h-full overflow-hidden`}>
       <div className="flex items-center justify-between gap-2">
         <span className="text-slate-300 text-sm md:text-base font-semibold uppercase tracking-wide truncate">{kpi.label}</span>
         <span className={`shrink-0 text-xs md:text-sm font-bold px-2 md:px-2.5 py-0.5 md:py-1 rounded ${colors.bg} ${colors.text} flex items-center gap-1 whitespace-nowrap`}>
@@ -76,7 +76,7 @@ export function KpiCard({ kpi }: { kpi: KpiCardData }) {
       )}
 
       {kpi.hasTarget && kpi.targetSource === "fallback" && (
-        <div className="text-xs text-slate-500 mt-auto pt-0.5 truncate">Target: business rule (no spreadsheet target found)</div>
+        <div className="text-xs text-slate-500 mt-auto truncate">Target: business rule (no spreadsheet target found)</div>
       )}
     </div>
   );
