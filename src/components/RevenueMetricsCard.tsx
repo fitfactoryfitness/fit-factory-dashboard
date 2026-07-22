@@ -33,8 +33,8 @@ export function RevenueMetricsCard({
 function Stat({ label, value, negative }: { label: string; value: string; negative?: boolean }) {
   return (
     <div className="min-w-0">
-      <div className="text-slate-500 uppercase text-xs md:text-sm tracking-wide truncate">{label}</div>
-      <div className={`text-lg md:text-2xl font-bold truncate ${negative ? "text-red-400" : "text-white"}`}>{value}</div>
+      <div className="text-slate-500 uppercase text-xs md:text-base tracking-wide truncate">{label}</div>
+      <div className={`text-2xl md:text-4xl font-bold truncate ${negative ? "text-red-400" : "text-white"}`}>{value}</div>
     </div>
   );
 }
