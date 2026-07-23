@@ -88,6 +88,7 @@ export function buildViewModel(payload: DashboardPayload, now: Date = new Date()
       summary.newMembershipsTarget.source,
       "count"
     ),
+    kpi("psc", "PSC", summary.pscMTD, summary.pscTarget.value, summary.pscTarget.source, "count"),
   ];
 
   const priorities = generatePriorities({ summary, calendarProgress: cal.calendarProgress, remainingDays: cal.remainingDays });

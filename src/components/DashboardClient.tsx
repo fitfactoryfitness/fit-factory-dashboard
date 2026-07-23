@@ -114,7 +114,16 @@ export function DashboardClient({ initial, debug }: { initial: { payload: Dashbo
               <KpiCard kpi={vm.kpis[2]} />
             </div>
             <div>
-              <PscCard psc={payload.summary.pscMTD} pscRev={payload.summary.pscRevMTD} />
+              <PscCard
+                psc={payload.summary.pscMTD}
+                pscRev={payload.summary.pscRevMTD}
+                target={vm.kpis[3].target}
+                targetSource={vm.kpis[3].targetSource}
+                progressPct={vm.kpis[3].progressPct}
+                expectedByToday={vm.kpis[3].expectedByToday}
+                status={vm.kpis[3].status}
+                paceGap={vm.kpis[3].paceGap}
+              />
             </div>
           </div>
         </div>

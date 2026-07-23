@@ -60,6 +60,7 @@ export type MonthlySummary = {
   revenueLostMTD: number | null;
   noVisitLast7MTD: number | null;
   pscMTD: number | null;
+  pscTarget: MetricTarget;
   pscRevMTD: number | null;
 
   // Forward MRR forecast (no spreadsheet label; read from confirmed
