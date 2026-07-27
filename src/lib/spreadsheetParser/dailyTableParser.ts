@@ -314,16 +314,39 @@ function applyPscFallback(grid: SheetGrid, totals: MonthlyTotalsRow, totalsRowIn
 // so they're read by the exact confirmed absolute column position (AG, AH,
 // AI). Each is a running snapshot like NO VISIT LAST 7 — take the last
 // non-blank value posted in that column across the daily rows, not a sum.
-export type MrrForecast = { plus1: number | null; plus2: number | null; plus3: number | null };
+export type MrrForecast = {
+  plus1: number | null;
+  plus2: number | null;
+  plus3: number | null;
+  plus1Previous: number | null;
+  plus2Previous: number | null;
+  plus3Previous: number | null;
+};
 
-function latestValueInColumn(grid: SheetGrid, start: number, end: number, col: number): number | null {
+// Same running-snapshot read used for NO VISIT LAST 7, but also returns the
+// entry posted immediately before the latest one (i.e. the prior day's
+// snapshot of the same AG/AH/AI column) so the UI can show a day-over-day
+// trend arrow. Still a plain read of two already-posted cells — no math
+// beyond "is the second one bigger than the first."
+function latestTwoValuesInColumn(
+  grid: SheetGrid,
+  start: number,
+  end: number,
+  col: number
+): { latest: number | null; previous: number | null } {
+  let latest: number | null = null;
   for (let r = Math.min(end, grid.length) - 1; r >= start; r--) {
     const raw = (grid[r] || [])[col];
     if (isBlank(raw)) continue;
     const parsed = parseCurrency(raw);
-    if (parsed.value !== null) return parsed.value;
+    if (parsed.value === null) continue;
+    if (latest === null) {
+      latest = parsed.value;
+      continue;
+    }
+    return { latest, previous: parsed.value };
   }
-  return null;
+  return { latest, previous: null };
 }
 
 export function parseDailyTable(
@@ -334,7 +357,14 @@ export function parseDailyTable(
   diagnostics: DiagnosticsEntry[],
   warnings: string[]
 ): { daily: DailyPerformance[]; monthlyTotals: MonthlyTotalsRow | null; mrrForecast: MrrForecast } {
-  const emptyMrrForecast: MrrForecast = { plus1: null, plus2: null, plus3: null };
+  const emptyMrrForecast: MrrForecast = {
+    plus1: null,
+    plus2: null,
+    plus3: null,
+    plus1Previous: null,
+    plus2Previous: null,
+    plus3Previous: null,
+  };
   const header = findHeaderRow(grid, 20);
   if (!header) {
     warnings.push("Could not locate the daily table header row by label search. Daily performance data is unavailable.");
@@ -451,10 +481,16 @@ export function parseDailyTable(
   // Forward MRR forecast (AG/AH/AI) — absolute-column reads, independent of
   // the TOTALS row entirely, since these are running snapshots rather than
   // monthly totals (see latestValueInColumn's doc comment above).
+  const plus1Snapshot = latestTwoValuesInColumn(grid, start, end, MRR_FORECAST_COLUMNS.plus1.col);
+  const plus2Snapshot = latestTwoValuesInColumn(grid, start, end, MRR_FORECAST_COLUMNS.plus2.col);
+  const plus3Snapshot = latestTwoValuesInColumn(grid, start, end, MRR_FORECAST_COLUMNS.plus3.col);
   const mrrForecast: MrrForecast = {
-    plus1: latestValueInColumn(grid, start, end, MRR_FORECAST_COLUMNS.plus1.col),
-    plus2: latestValueInColumn(grid, start, end, MRR_FORECAST_COLUMNS.plus2.col),
-    plus3: latestValueInColumn(grid, start, end, MRR_FORECAST_COLUMNS.plus3.col),
+    plus1: plus1Snapshot.latest,
+    plus2: plus2Snapshot.latest,
+    plus3: plus3Snapshot.latest,
+    plus1Previous: plus1Snapshot.previous,
+    plus2Previous: plus2Snapshot.previous,
+    plus3Previous: plus3Snapshot.previous,
   };
   diagnostics.push({
     metric: "mrrForecast",

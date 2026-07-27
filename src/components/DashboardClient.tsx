@@ -149,6 +149,9 @@ export function DashboardClient({ initial, debug }: { initial: { payload: Dashbo
             plus1={payload.summary.mrrForecast.plus1}
             plus2={payload.summary.mrrForecast.plus2}
             plus3={payload.summary.mrrForecast.plus3}
+            plus1Previous={payload.summary.mrrForecast.plus1Previous}
+            plus2Previous={payload.summary.mrrForecast.plus2Previous}
+            plus3Previous={payload.summary.mrrForecast.plus3Previous}
           />
         </div>
 

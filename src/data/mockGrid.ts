@@ -57,10 +57,14 @@ export function buildMockJulGrid(): SheetGrid {
       (gross * 0.75).toFixed(2), trials, cp, trials + 1, trials, day % 6 === 0 ? 1 : 0, day % 7 === 0 ? 1 : 0,
       0, 0, "$0.00", "$0.00", (gross * 1.05).toFixed(2), (gross * 0.7).toFixed(2), "68%", day % 9 === 0 ? "" : 45 + day,
       0, "0%", 2, "10%", "$0.00", 0, day === 11 ? 1 : 0, "$0.00", 0, day === 19 ? "24,305.00" : "0.00", 51000 + day * 10,
-      // MRR +1/+2 mo forecast columns: blank until the day the forecast is
-      // actually posted (day 19 here), mirroring how these running snapshots
-      // behave on the live sheet — only the LATEST posted value is used.
-      day === 19 ? "58200.00" : "", day === 19 ? "61500.00" : ""
+      // MRR +1/+2 mo forecast columns: blank until first posted, mirroring
+      // how these running snapshots behave on the live sheet (only the
+      // LATEST posted value is used for the headline figure). Day 18's entry
+      // is included too, purely so the mock exercises the day-over-day trend
+      // arrow in both directions (+2 mo trends up here, +3 mo trends down) —
+      // day 19 stays the values the smoke test asserts on.
+      day === 19 ? "58200.00" : day === 18 ? "58150.00" : "",
+      day === 19 ? "61500.00" : day === 18 ? "61550.00" : ""
     );
   }
   // Day 20: today, in progress — deliberately sparse to test blank handling.
