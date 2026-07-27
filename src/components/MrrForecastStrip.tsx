@@ -21,18 +21,21 @@ function TrendArrow({ value, previous }: { value: number | null; previous: numbe
   const delta = Math.abs(value - previous);
   return (
     <span
-      className={`inline-flex items-center gap-0.5 shrink-0 ${isUp ? "text-emerald-400" : "text-red-400"}`}
+      className={`inline-flex items-center shrink-0 ${isUp ? "text-emerald-400" : "text-red-400"}`}
       title={`${isUp ? "Up" : "Down"} ${fmtCurrency(delta)} since it last changed`}
     >
-      <svg
-        width="14"
-        height="14"
-        viewBox="0 0 24 24"
-        fill="none"
-        className={isUp ? "" : "rotate-180"}
-        aria-hidden="true"
-      >
-        <path d="M6 15L12 9L18 15" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        {isUp ? (
+          <>
+            <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+            <polyline points="16 7 22 7 22 13" />
+          </>
+        ) : (
+          <>
+            <polyline points="22 17 13.5 8.5 8.5 13.5 2 7" />
+            <polyline points="16 17 22 17 22 11" />
+          </>
+        )}
       </svg>
     </span>
   );
@@ -70,9 +73,9 @@ export function MrrForecastStrip({
               <div className="min-w-0 shrink-0 w-44">
                 <div className="text-xs text-slate-500 uppercase tracking-wide truncate">{e.label}</div>
                 <div className="text-lg font-bold text-white truncate flex items-center gap-1.5">
+                  <TrendArrow value={e.value} previous={e.previous} />
                   {fmtCurrency(e.value)}
                   <span className="text-slate-500 font-medium text-sm"> / {fmtCurrency(MRR_TARGET)}</span>
-                  <TrendArrow value={e.value} previous={e.previous} />
                 </div>
               </div>
               <div className="flex-1 h-3.5 rounded-full bg-bg-border overflow-hidden min-w-[40px]">
