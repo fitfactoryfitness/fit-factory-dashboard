@@ -97,3 +97,111 @@ export function buildMockJulGrid(): SheetGrid {
   row("MONTHLY TOTALS", "MONTHLY TOTALS");
   return rows;
 }
+
+const MONTH_ORDER = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+
+// Synthetic grid for any month OTHER than JUL, used only when the user picks
+// a different month in the UI (month selector / compare panel) while running
+// against mock data (no live Google credentials configured). Deliberately a
+// SEPARATE function from buildMockJulGrid() above — that one's exact values
+// are asserted on by the smoke test and must never change. This generator
+// reuses the identical header/label layout (so the real label-search parser
+// is exercised the same way it is against a live sheet), but produces
+// numerically distinct, deterministic (not random) data per month so
+// switching months in local dev actually looks different month to month —
+// it is illustrative only, not a snapshot of any real month.
+export function buildMockGridForMonth(monthTab: string, year: number): SheetGrid {
+  const monthIndex = MONTH_ORDER.indexOf(monthTab);
+  const totalDays = new Date(Date.UTC(year, monthIndex + 1, 0)).getUTCDate();
+  const seed = 0.7 + monthIndex * 0.04; // mild seasonal growth JAN -> DEC, deterministic per month
+
+  const rows: string[][] = [];
+  const row = (...cells: (string | number)[]) => rows.push(cells.map((c) => String(c)));
+
+  const revenueGoal = Math.round(80000 * seed);
+
+  row("", `${monthTab} ${year}`, "DAILY REPORT SUMMARY");
+  row("DOWNTOWN", "BOOKED REVENUE", `$${Math.round(22000 * seed).toLocaleString()}.00`);
+  row("Membership Start", "260", "REVENUE GOAL", `$${revenueGoal.toLocaleString()}`);
+  row("Utilization Goal", "70%", "REVENUE MTD", "");
+  row("Attrition Goal", "5%", "PROJECTED REVENUE", "");
+  row("Total Sales", "50", "GAP TO GOAL - MONTH", "");
+  row("DAYS 1-7", "DAYS 8-14", "DAYS 15-21", "DAYS 21+");
+  row("$0.00", "$0.00", "$0.00", "$0.00");
+  row("PREVIOUS MONTH");
+  row("BUSINESS PERFORMANCE");
+  row(
+    "DAY", "GROSS REVENUE", "MEMBERSHIPS", "CREDITS", "PENALTY FEES", "MISC", "REV TOTAL", "PRETAX",
+    "TRIALS", "CP TO TRIALS", "BOOKED", "SHOW", "NEW MEMBERSHIPS", "CLASS PACKS", "PT", "PSC", "PSC REV",
+    "DEPOSIT", "TOTAL SALES", "REFINED REV", "UTILIZATION", "VISTS", "PSC VISITS", "PSC %", "CP VISITS",
+    "CP %", "CP REV", "FROZEN", "TERMINATIONS", "REV LOST", "NO VISIT LAST 7", "BOOKED REV",
+    "MRR", "MRR +1 MO", "MRR +2 MO"
+  );
+  row("DOWNTOWN", "DOWNTOWN");
+
+  let revenueSum = 0;
+  let trialsSum = 0;
+  let cpSum = 0;
+  let newMembershipsSum = 0;
+  let terminationsSum = 0;
+  let pscSum = 0;
+  let pscRevSum = 0;
+  let totalSalesSum = 0;
+
+  for (let day = 1; day <= totalDays; day++) {
+    const base = 1800 + ((day * 137 + monthIndex * 53) % 2600); // deterministic pseudo-variation, not random
+    const gross = Math.round(base * seed);
+    const pretax = Math.round(gross * 0.75);
+    const trials = day % 4 === 0 ? 2 : day % 3 === 0 ? 1 : 0;
+    const cp = day % 5 === 0 ? 1 : 0;
+    const newMemberships = day % 6 === 0 ? 1 : 0;
+    const termination = day % 9 === 0 ? 1 : 0;
+    const psc = day % 8 === 0 ? 1 : 0;
+    const pscRev = psc ? Math.round(150 * seed) : 0;
+    const totalSalesDay = day % 2 === 0 ? 1 : 0;
+
+    revenueSum += pretax;
+    trialsSum += trials;
+    cpSum += cp;
+    newMembershipsSum += newMemberships;
+    terminationsSum += termination;
+    pscSum += psc;
+    pscRevSum += pscRev;
+    totalSalesSum += totalSalesDay;
+
+    row(
+      day, gross.toFixed(2), (gross * 0.6).toFixed(2), "0.00", "0.00", "0.00", (gross * 1.02).toFixed(2),
+      pretax.toFixed(2), trials, cp, trials + 1, trials, newMemberships, 0,
+      0, psc, pscRev.toFixed(2), "$0.00", totalSalesDay, (gross * 1.05).toFixed(2), (gross * 0.7).toFixed(2),
+      `${65 + (day % 10)}%`, 45 + day, 0, "0%", 2, "10%", "$0.00", 0, termination, "$0.00", 0, "0.00", 51000 + day * 10,
+      (58000 + day * 10 + monthIndex * 500).toFixed(2), (61000 + day * 10 + monthIndex * 500).toFixed(2)
+    );
+  }
+
+  const totalsRow = new Array(35).fill("");
+  totalsRow[0] = "TOTALS";
+  totalsRow[7] = revenueSum.toFixed(2);
+  totalsRow[8] = trialsSum;
+  totalsRow[9] = cpSum;
+  totalsRow[12] = newMembershipsSum;
+  totalsRow[15] = pscSum;
+  totalsRow[16] = pscRevSum.toFixed(2);
+  totalsRow[18] = totalSalesSum;
+  totalsRow[20] = "68%";
+  totalsRow[28] = terminationsSum;
+  row(...totalsRow);
+
+  // A completed synthetic month: "projected" and "MTD" are the same total,
+  // and the gap is that total against the goal — filled in AFTER the totals
+  // row is built so these three summary-block labels (only ever read from
+  // the summary block, never the TOTALS row) have a real, self-consistent
+  // value rather than showing "unavailable".
+  rows[3][3] = `$${revenueSum.toLocaleString()}`; // REVENUE MTD
+  rows[4][3] = `$${revenueSum.toLocaleString()}`; // PROJECTED REVENUE
+  const gap = revenueSum - revenueGoal;
+  rows[5][3] = gap < 0 ? `-$${Math.abs(gap).toLocaleString()}` : `$${gap.toLocaleString()}`;
+
+  row("MIDTOWN", "MIDTOWN");
+  row("MONTHLY TOTALS", "MONTHLY TOTALS");
+  return rows;
+}

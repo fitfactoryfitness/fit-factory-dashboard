@@ -58,3 +58,15 @@ export function resolveTab(requestedTab: string, availableTabs: string[]): TabRe
     warning: `${requestedTab} tab not found. Showing ${resolvedTab} data.`,
   };
 }
+
+// Which month tabs actually exist in the workbook (JAN..DEC only — excludes
+// ANNUAL/TEMPLATE/TRIALS and anything else that isn't a real month tab),
+// returned in calendar order regardless of the order they appear in the
+// sheet's tab bar. Used to populate the month selector/comparison picker —
+// never hardcode "JAN through JUL" in the UI, since which tabs exist is a
+// workbook fact that changes as months are added.
+export function listMonthTabsInOrder(availableTabs: string[]): string[] {
+  return MONTH_ABBR.filter((m) => availableTabs.includes(m));
+}
+
+export { MONTH_ABBR };

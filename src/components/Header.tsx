@@ -7,6 +7,7 @@ import Image from "next/image";
 // works regardless of location in the project, unlike a plain <img src="/...">
 // URL, which only resolves files actually placed in the public/ folder.
 import logoWhite from "@/logo-white.png";
+import { monthFullName } from "@/lib/monthLabels";
 
 function freshnessLabel(generatedAt: string): { label: string; cls: string } {
   const ageMin = (Date.now() - new Date(generatedAt).getTime()) / 60000;
@@ -19,11 +20,26 @@ export function Header({
   monthLabel,
   generatedAt,
   isMock,
+  availableMonths,
+  selectedMonth,
+  year,
+  onSelectMonth,
+  onOpenCompare,
 }: {
   monthLabel: string;
   generatedAt: string;
   dataSource: "mock" | "google";
   isMock: boolean;
+  // Month selector — this is the one interactive control on an otherwise
+  // unattended kiosk display. It's harmless on the TV (nobody touches it
+  // there) and lets anyone opening the same URL on a laptop/phone look at a
+  // past month or open the compare view. Selecting a month never disables
+  // the underlying auto-refresh of the live/current month.
+  availableMonths: string[];
+  selectedMonth: string;
+  year: number;
+  onSelectMonth: (month: string) => void;
+  onOpenCompare: () => void;
 }) {
   const [now, setNow] = useState(new Date());
   useEffect(() => {
@@ -41,7 +57,29 @@ export function Header({
     // the logo genuinely centered regardless of the text length on either side.
     <header className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 px-4 md:px-6 py-1.5 md:py-2 border-b border-bg-border bg-bg-panel shrink-0">
       <div className="flex items-center gap-2 md:gap-3 flex-wrap min-w-0">
-        <span className="text-slate-400 text-base md:text-xl font-semibold whitespace-nowrap">{monthLabel}</span>
+        {availableMonths.length > 0 ? (
+          <select
+            value={selectedMonth}
+            onChange={(e) => onSelectMonth(e.target.value)}
+            aria-label="Select month"
+            className="bg-transparent text-slate-300 text-base md:text-xl font-semibold whitespace-nowrap border border-bg-border rounded-md px-2 py-0.5 focus:outline-none focus:border-slate-500 cursor-pointer"
+          >
+            {availableMonths.map((m) => (
+              <option key={m} value={m} className="bg-bg-panel text-slate-100">
+                {monthFullName(m).toUpperCase()} {year}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <span className="text-slate-400 text-base md:text-xl font-semibold whitespace-nowrap">{monthLabel}</span>
+        )}
+        <button
+          type="button"
+          onClick={onOpenCompare}
+          className="text-xs md:text-sm font-semibold px-2 md:px-2.5 py-1 rounded border border-bg-border text-slate-300 hover:bg-white/5 whitespace-nowrap"
+        >
+          Compare
+        </button>
         {isMock && (
           <span className="text-xs md:text-sm font-bold px-2 md:px-2.5 py-0.5 md:py-1 rounded bg-purple-500/20 text-purple-300 border border-purple-500/40 whitespace-nowrap">
             MOCK DATA

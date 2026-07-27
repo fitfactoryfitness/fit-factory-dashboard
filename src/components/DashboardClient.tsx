@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import { DashboardPayload } from "@/types/dashboard";
 import { buildViewModel } from "@/lib/viewModel";
 import { AUTO_REFRESH_INTERVAL_MS } from "@/config/thresholds";
+import { monthFullName } from "@/lib/monthLabels";
 import { Header } from "./Header";
 import { RevenueHero } from "./RevenueHero";
 import { KpiCard } from "./KpiCard";
@@ -13,6 +14,7 @@ import { MrrForecastStrip } from "./MrrForecastStrip";
 import { TrendChart } from "./TrendChart";
 import { MidtownStrip } from "./MidtownStrip";
 import { DebugPanel } from "./DebugPanel";
+import { ComparePanel } from "./ComparePanel";
 
 // Toggle to bring the Daily Revenue Trend card back — kept in the code (not
 // deleted) per product request, just hidden from render for now.
@@ -23,6 +25,13 @@ async function fetchDashboard(): Promise<{ payload: DashboardPayload; error: str
   const json = await res.json();
   if (!json.payload) throw new Error(json.error || "Failed to load dashboard data.");
   return json;
+}
+
+async function fetchDashboardForMonth(month: string): Promise<DashboardPayload> {
+  const res = await fetch(`/api/dashboard?month=${month}`, { cache: "no-store" });
+  const json = await res.json();
+  if (!json.payload) throw new Error(json.error || `Failed to load ${month}.`);
+  return json.payload as DashboardPayload;
 }
 
 export function DashboardClient({ initial, debug }: { initial: { payload: DashboardPayload; error: string | null }; debug: boolean }) {
@@ -42,7 +51,54 @@ export function DashboardClient({ initial, debug }: { initial: { payload: Dashbo
     return () => clearInterval(t);
   }, [refresh]);
 
-  const { payload, error } = state;
+  // Month selector state. viewMonth === null means "live" — the auto-
+  // refreshing current-month data above is what's shown. Picking a month
+  // from the dropdown fetches that tab once (historical data doesn't need
+  // polling) and swaps the rendered payload without touching the live poll,
+  // so "Back to Live" is instant.
+  const [availableMonths, setAvailableMonths] = useState<string[]>([]);
+  const [currentMonthTab, setCurrentMonthTab] = useState<string>("");
+  const [viewMonth, setViewMonth] = useState<string | null>(null);
+  const [historicalPayload, setHistoricalPayload] = useState<DashboardPayload | null>(null);
+  const [historicalLoading, setHistoricalLoading] = useState(false);
+  const [historicalError, setHistoricalError] = useState<string | null>(null);
+  const [compareOpen, setCompareOpen] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/months")
+      .then((r) => r.json())
+      .then((json) => {
+        setAvailableMonths(json.months || []);
+        setCurrentMonthTab(json.current || "");
+      })
+      .catch(() => {
+        // Non-fatal — the month selector just won't render if this fails;
+        // the live kiosk view above is entirely unaffected.
+      });
+  }, []);
+
+  const handleSelectMonth = useCallback(
+    (month: string) => {
+      if (month === currentMonthTab) {
+        setViewMonth(null);
+        return;
+      }
+      setViewMonth(month);
+      setHistoricalLoading(true);
+      setHistoricalError(null);
+      fetchDashboardForMonth(month)
+        .then((p) => setHistoricalPayload(p))
+        .catch((err) => setHistoricalError(err instanceof Error ? err.message : "Failed to load month"))
+        .finally(() => setHistoricalLoading(false));
+    },
+    [currentMonthTab]
+  );
+
+  const { payload: livePayload, error } = state;
+  // Only swap to the historical payload once it's actually loaded AND
+  // matches the currently selected month (avoids briefly showing a stale
+  // previous selection while the new one is still loading).
+  const payload = viewMonth && historicalPayload && historicalPayload.summary.tabName === viewMonth ? historicalPayload : livePayload;
   const vm = useMemo(() => buildViewModel(payload, new Date()), [payload]);
 
   const monthLabel = new Date(payload.generatedAt)
@@ -68,7 +124,27 @@ export function DashboardClient({ initial, debug }: { initial: { payload: Dashbo
         generatedAt={payload.generatedAt}
         dataSource={payload.dataSource}
         isMock={payload.dataSource === "mock"}
+        availableMonths={availableMonths}
+        selectedMonth={viewMonth ?? currentMonthTab}
+        year={payload.summary.year}
+        onSelectMonth={handleSelectMonth}
+        onOpenCompare={() => setCompareOpen(true)}
       />
+
+      {viewMonth && (
+        <div className="px-6 py-1 bg-sky-500/10 border-b border-sky-500/30 text-sky-300 text-xs shrink-0 flex items-center gap-3">
+          {historicalLoading ? (
+            <span>Loading {monthFullName(viewMonth)}…</span>
+          ) : historicalError ? (
+            <span className="text-red-300">Failed to load {monthFullName(viewMonth)}: {historicalError} — showing live data below.</span>
+          ) : (
+            <span>Viewing {monthFullName(viewMonth)} — historical, not live.</span>
+          )}
+          <button type="button" onClick={() => setViewMonth(null)} className="underline hover:no-underline">
+            Back to Live
+          </button>
+        </div>
+      )}
 
       {error && (
         <div className="px-6 py-1 bg-amber-500/10 border-b border-amber-500/30 text-amber-300 text-xs shrink-0">
@@ -161,6 +237,15 @@ export function DashboardClient({ initial, debug }: { initial: { payload: Dashbo
       </main>
 
       {debug && <DebugPanel payload={payload} error={error} />}
+
+      {compareOpen && (
+        <ComparePanel
+          open={compareOpen}
+          onClose={() => setCompareOpen(false)}
+          availableMonths={availableMonths}
+          currentMonthTab={currentMonthTab}
+        />
+      )}
     </div>
   );
 }
