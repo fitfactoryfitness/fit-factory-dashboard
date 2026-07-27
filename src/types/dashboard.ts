@@ -66,9 +66,11 @@ export type MonthlySummary = {
   // Forward MRR forecast (no spreadsheet label; read from confirmed
   // absolute columns AG/AH/AI — see PSC_TOTALS_FALLBACK/MRR_FORECAST_COLUMNS
   // in config/fallbackCells.ts and dailyTableParser.ts for provenance).
-  // Each also carries the prior non-blank entry posted in that same column
-  // (i.e. yesterday's snapshot of the same forecast), so the UI can show a
-  // day-over-day trend arrow — still a direct read, nothing recalculated.
+  // Each also carries the most recent DIFFERENT value previously posted in
+  // that same column (skipping any run of unchanged re-entries), so the UI
+  // can show a trend arrow reflecting the last real change rather than
+  // flattening to "no change" whenever the forecast is re-posted verbatim
+  // for a few days — still a direct read, nothing recalculated.
   mrrForecast: {
     plus1: number | null;
     plus2: number | null;

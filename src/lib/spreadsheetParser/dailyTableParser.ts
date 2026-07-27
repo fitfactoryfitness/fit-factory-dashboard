@@ -323,11 +323,16 @@ export type MrrForecast = {
   plus3Previous: number | null;
 };
 
-// Same running-snapshot read used for NO VISIT LAST 7, but also returns the
-// entry posted immediately before the latest one (i.e. the prior day's
-// snapshot of the same AG/AH/AI column) so the UI can show a day-over-day
-// trend arrow. Still a plain read of two already-posted cells — no math
-// beyond "is the second one bigger than the first."
+// Same running-snapshot read used for NO VISIT LAST 7, but also walks
+// further back to find the most recent entry whose value actually differs
+// from the latest one — not just the literal prior row. This forecast often
+// gets re-posted unchanged for several days in a row (whoever maintains the
+// sheet doesn't necessarily touch it daily), so comparing against the
+// immediately-prior row would show "flat" almost every day even when the
+// forecast genuinely moved a few days ago. Skipping duplicate values gives
+// the UI a trend arrow that reflects the last real change, not the last
+// re-entry of the same number. Still a plain read of already-posted cells —
+// no math beyond "is this one bigger than that one."
 function latestTwoValuesInColumn(
   grid: SheetGrid,
   start: number,
@@ -344,6 +349,7 @@ function latestTwoValuesInColumn(
       latest = parsed.value;
       continue;
     }
+    if (parsed.value === latest) continue; // unchanged re-entry — keep looking further back
     return { latest, previous: parsed.value };
   }
   return { latest, previous: null };

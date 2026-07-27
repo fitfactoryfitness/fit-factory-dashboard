@@ -8,12 +8,13 @@ import { fmtCurrency } from "@/lib/format";
 // the three values to each other.
 const MRR_TARGET = 100_000;
 
-// Day-over-day trend arrow: compares today's posted snapshot for a given
-// forecast column against the immediately-prior non-blank entry in that same
-// column (e.g. Aug forecast on Jul 11 vs Aug forecast on Jul 10) — not a
-// comparison between the three forecast columns themselves. Green/up if the
-// snapshot increased since the last entry, red/down if it decreased, no
-// arrow if flat or there's no prior entry yet to compare against.
+// Trend arrow: compares today's posted snapshot for a given forecast column
+// against the most recent PRIOR entry that actually differs from it (the
+// parser already skips past any run of unchanged re-entries to find this) —
+// not a comparison between the three forecast columns themselves. Green/up
+// if the forecast increased since it last changed, red/down if it
+// decreased, no arrow if it's never changed yet or there's nothing to
+// compare against.
 function TrendArrow({ value, previous }: { value: number | null; previous: number | null }) {
   if (value === null || previous === null || value === previous) return null;
   const isUp = value > previous;
@@ -21,7 +22,7 @@ function TrendArrow({ value, previous }: { value: number | null; previous: numbe
   return (
     <span
       className={`inline-flex items-center gap-0.5 shrink-0 ${isUp ? "text-emerald-400" : "text-red-400"}`}
-      title={`${isUp ? "Up" : "Down"} ${fmtCurrency(delta)} since last update`}
+      title={`${isUp ? "Up" : "Down"} ${fmtCurrency(delta)} since it last changed`}
     >
       <svg
         width="14"
