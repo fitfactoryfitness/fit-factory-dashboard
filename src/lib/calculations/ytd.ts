@@ -14,6 +14,11 @@ export type YtdSummary = {
   // Percentage, not additive — see note below. Kept separate from the
   // summed fields above so nothing implies it was derived the same way.
   utilizationAvgPct: number | null;
+  // Names of fields where at least one included month had no data for that
+  // field, so the total only reflects the months that did (see "Null
+  // handling" below) — the UI uses this to label those specific numbers as
+  // partial rather than implying they cover the whole included range.
+  partialFields: string[];
   warnings: string[];
 };
 
@@ -42,27 +47,37 @@ type SummableField = (typeof SUMMABLE_FIELDS)[number];
 // source cell is ever added to the workbook (e.g. on the ANNUAL tab), prefer
 // reading it directly and retire this function.
 //
-// Null handling: if ANY included month is missing a given field, that
-// field's YTD total is reported as null rather than silently treating the
-// missing month as zero (which would understate the true total) — same
-// "unavailable rather than guessed" philosophy used everywhere else.
+// Null handling: a field is summed across whichever included months
+// actually have it — a month with no CP-to-Trials column at all (real gap,
+// confirmed in earlier months' sheets per MAPPING_REPORT) doesn't blank out
+// the whole YTD figure, it's just excluded from that one field's total. If
+// NO included month has the field, the total is null (nothing to sum).
+// Fields missing at least one month are named in `partialFields` so the UI
+// can flag them as partial rather than presenting them as a complete total
+// across every included month, the same way utilizationAvgPct below is
+// flagged as an average rather than implied to be as authoritative as a
+// full sum.
 export function sumYtd(monthlySummaries: { tabName: string; summary: MonthlySummary }[]): YtdSummary {
   const warnings: string[] = [];
+  const partialFields: string[] = [];
   const totals = {} as Record<SummableField, number | null>;
 
   for (const field of SUMMABLE_FIELDS) {
     let runningTotal = 0;
     let anyMissing = false;
+    let anyPresent = false;
     for (const { tabName, summary } of monthlySummaries) {
       const value = summary[field];
       if (value === null) {
         anyMissing = true;
-        warnings.push(`${tabName} is missing ${field}; YTD ${field} is reported unavailable rather than understated.`);
+        warnings.push(`${tabName} is missing ${field}; excluded from that field's YTD total.`);
         continue;
       }
+      anyPresent = true;
       runningTotal += value;
     }
-    totals[field] = anyMissing ? null : runningTotal;
+    if (anyMissing && anyPresent) partialFields.push(field);
+    totals[field] = anyPresent ? runningTotal : null;
   }
 
   // Simple (unweighted) mean across the included months' own already-
@@ -80,6 +95,7 @@ export function sumYtd(monthlySummaries: { tabName: string; summary: MonthlySumm
     monthsIncluded: monthlySummaries.map((m) => m.tabName),
     ...totals,
     utilizationAvgPct,
+    partialFields,
     warnings,
   };
 }

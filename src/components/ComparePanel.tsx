@@ -17,6 +17,10 @@ const MAX_MONTHS = 3;
 type CompareColumn = {
   label: string;
   isYtd: boolean;
+  // Field names whose YTD total didn't get data from every included month
+  // (see sumYtd's null handling) — always empty for a single-month column,
+  // since a single month is never "partial" in that sense.
+  partialFields: string[];
   revenueMTD: number | null;
   trialsMTD: number | null;
   cpToTrialsMTD: number | null;
@@ -33,6 +37,7 @@ function fromMonthlySummary(tab: string, summary: MonthlySummary): CompareColumn
   return {
     label: `${monthFullName(tab)} ${summary.year}`,
     isYtd: false,
+    partialFields: [],
     revenueMTD: summary.revenueMTD,
     trialsMTD: summary.trialsMTD,
     cpToTrialsMTD: summary.cpToTrialsMTD,
@@ -51,6 +56,7 @@ function fromYtd(ytd: YtdSummary): CompareColumn {
   return {
     label: `YTD (thru ${monthFullName(last ?? "")})`,
     isYtd: true,
+    partialFields: ytd.partialFields,
     revenueMTD: ytd.revenueMTD,
     trialsMTD: ytd.trialsMTD,
     cpToTrialsMTD: ytd.cpToTrialsMTD,
@@ -213,6 +219,12 @@ export function ComparePanel({
                       <td key={i} className="py-1.5 px-3 text-white font-medium whitespace-nowrap">
                         {row.fmt(c[row.key] as number | null)}
                         {row.key === "utilizationPct" && c.isYtd && <span className="text-slate-500 text-xs"> (avg)</span>}
+                        {c.partialFields.includes(row.key) && (
+                          <span className="text-slate-500 text-xs" title="One or more included months had no data for this field — total reflects only the months that did.">
+                            {" "}
+                            (partial)
+                          </span>
+                        )}
                       </td>
                     ))}
                   </tr>
