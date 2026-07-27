@@ -7,7 +7,6 @@ import { MonthlySummary } from "@/types/dashboard";
 import { YtdSummary } from "@/lib/calculations/ytd";
 
 const MAX_MONTHS = 3;
-const MONTH_ORDER = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
 
 // One normalized shape for a comparison column, whether it came from a
 // single month's MonthlySummary or from the summed YtdSummary — every field
@@ -124,14 +123,12 @@ export function ComparePanel({
 
       let ytdCol: CompareColumn | null = null;
       if (includeYtd) {
-        // YTD through the calendar-latest selected month (not "last one
-        // clicked" — order of clicks shouldn't determine this), or the live
-        // current month if nothing's selected.
-        const through =
-          selected.length > 0
-            ? [...selected].sort((a, b) => MONTH_ORDER.indexOf(a) - MONTH_ORDER.indexOf(b))[selected.length - 1]
-            : currentMonthTab;
-        const res = await fetch(`/api/ytd?through=${through}`, { cache: "no-store" });
+        // "Year to Date" always means Jan through the live current month —
+        // it runs through the ongoing month regardless of which specific
+        // months are checked above for side-by-side comparison. Checking
+        // only, say, June for comparison shouldn't cap YTD at June and
+        // silently drop July's (still-in-progress) data from the total.
+        const res = await fetch(`/api/ytd?through=${currentMonthTab}`, { cache: "no-store" });
         const json = await res.json();
         if (!json.ytd) throw new Error(json.error || "Failed to load Year to Date");
         ytdCol = fromYtd(json.ytd as YtdSummary);

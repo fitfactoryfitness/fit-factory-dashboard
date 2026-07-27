@@ -98,8 +98,12 @@ export function DashboardClient({ initial, debug }: { initial: { payload: Dashbo
   // Only swap to the historical payload once it's actually loaded AND
   // matches the currently selected month (avoids briefly showing a stale
   // previous selection while the new one is still loading).
-  const payload = viewMonth && historicalPayload && historicalPayload.summary.tabName === viewMonth ? historicalPayload : livePayload;
-  const vm = useMemo(() => buildViewModel(payload, new Date()), [payload]);
+  const isViewingHistorical = viewMonth !== null && historicalPayload !== null && historicalPayload.summary.tabName === viewMonth;
+  const payload = isViewingHistorical ? historicalPayload : livePayload;
+  // isHistorical tells buildViewModel this month is CLOSED, not in progress
+  // — see the big comment on buildViewModel for why that changes the pace
+  // math (a past month shouldn't be judged against today's date).
+  const vm = useMemo(() => buildViewModel(payload, new Date(), isViewingHistorical), [payload, isViewingHistorical]);
 
   const monthLabel = new Date(payload.generatedAt)
     .toLocaleDateString("en-US", { month: "long", year: "numeric", timeZone: payload.timezone })
@@ -160,6 +164,7 @@ export function DashboardClient({ initial, debug }: { initial: { payload: Dashbo
             calendarProgressPct={vm.cal.calendarProgress * 100}
             remaining={vm.remaining}
             revenueStatus={vm.revenueStatus}
+            isHistorical={isViewingHistorical}
           />
         </div>
 
@@ -179,10 +184,11 @@ export function DashboardClient({ initial, debug }: { initial: { payload: Dashbo
           </div>
           <div>
             <RevenueMetricsCard
-              projectedRevenue={payload.summary.projectedRevenue}
-              revenueGap={payload.summary.revenueGap}
+              projectedRevenue={vm.effectiveProjectedRevenue}
+              revenueGap={vm.effectiveGap}
               requiredDaily={vm.requiredDaily}
               actualDaily={vm.actualDaily}
+              isHistorical={isViewingHistorical}
             />
           </div>
           <div className="grid grid-cols-1 gap-3 md:grid-rows-2 md:gap-1.5">
@@ -220,16 +226,21 @@ export function DashboardClient({ initial, debug }: { initial: { payload: Dashbo
           </div>
         )}
 
-        <div className="shrink-0">
-          <MrrForecastStrip
-            plus1={payload.summary.mrrForecast.plus1}
-            plus2={payload.summary.mrrForecast.plus2}
-            plus3={payload.summary.mrrForecast.plus3}
-            plus1Previous={payload.summary.mrrForecast.plus1Previous}
-            plus2Previous={payload.summary.mrrForecast.plus2Previous}
-            plus3Previous={payload.summary.mrrForecast.plus3Previous}
-          />
-        </div>
+        {/* Forward-looking forecast — meaningless for a closed past month,
+            so it's hidden entirely rather than showing stale/frozen numbers
+            when viewing anything other than the live current month. */}
+        {!isViewingHistorical && (
+          <div className="shrink-0">
+            <MrrForecastStrip
+              plus1={payload.summary.mrrForecast.plus1}
+              plus2={payload.summary.mrrForecast.plus2}
+              plus3={payload.summary.mrrForecast.plus3}
+              plus1Previous={payload.summary.mrrForecast.plus1Previous}
+              plus2Previous={payload.summary.mrrForecast.plus2Previous}
+              plus3Previous={payload.summary.mrrForecast.plus3Previous}
+            />
+          </div>
+        )}
 
         <div className="shrink-0 flex items-center pb-3 md:pb-0">
           {payload.summary.midtown && <MidtownStrip midtown={payload.summary.midtown} />}

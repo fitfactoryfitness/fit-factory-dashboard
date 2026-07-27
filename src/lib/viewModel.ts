@@ -8,14 +8,51 @@ import {
   actualAverageDaily,
   expectedByToday,
   paceGap,
+  daysInMonth,
 } from "@/lib/calculations/pace";
 import { computeOverallStatus, computeKpiStatus, computeProjectedRevenueStatus } from "@/lib/calculations/status";
 import { generatePriorities } from "@/lib/priorityEngine";
 import { BUSINESS_TIMEZONE } from "@/config/thresholds";
+import { MONTH_ABBR } from "@/lib/googleSheets/tabResolver";
 
-export function buildViewModel(payload: DashboardPayload, now: Date = new Date()) {
+// Synthetic "calendar" for a closed month: the whole month counts as
+// elapsed (calendarProgress = 1, remainingDays = 0), so every pace formula
+// downstream (expectedByToday, requiredPerRemainingDay, etc.) evaluates as
+// "compare the final number to the full target" rather than "compare to
+// wherever real-world today happens to fall." elapsedDays is set to
+// (totalDays - 1) rather than totalDays so the existing `+ 1` in the
+// actualDaily call below still lands on exactly totalDays, matching how
+// that same call is used for the live in-progress month.
+function closedMonthCalendar(year: number, monthTab: string) {
+  const monthIndex = MONTH_ABBR.indexOf(monthTab);
+  const total = monthIndex >= 0 ? daysInMonth(year, monthIndex) : 30;
+  return {
+    year,
+    monthNum: monthIndex + 1,
+    day: total,
+    totalDaysInMonth: total,
+    elapsedDays: total - 1,
+    remainingDays: 0,
+    calendarProgress: 1,
+  };
+}
+
+// isHistorical = true when the payload being viewed is a CLOSED past month
+// (selected via the month selector/compare panel), not the live current
+// month. Every pace calculation in this file ("expected by today," "need
+// X/day," "ahead/behind pace") implicitly assumes today is a date WITHIN the
+// month being viewed — that assumption breaks for a past month, where
+// "today" (the real current date) has nothing to do with it. Concretely:
+// treating a closed June as if only 85% of "the month" had elapsed (because
+// today happens to be July 27) makes an already-goal-exceeding June look
+// "behind pace" and renders its progress bar red. For a closed month there
+// is no more pacing to do, so the calendar is instead treated as 100%
+// elapsed — "expected by today" collapses to "the full target," and status
+// becomes a simple "did this month hit its number," which is the only
+// question that's still meaningful once the month is over.
+export function buildViewModel(payload: DashboardPayload, now: Date = new Date(), isHistorical: boolean = false) {
   const { summary, daily } = payload;
-  const cal = getCalendarProgress(now, BUSINESS_TIMEZONE);
+  const cal = isHistorical ? closedMonthCalendar(summary.year, summary.month) : getCalendarProgress(now, BUSINESS_TIMEZONE);
 
   const goalProg = goalProgress(summary.revenueMTD, summary.revenueGoal);
   const variance = paceVariance(goalProg, cal.calendarProgress);
@@ -26,17 +63,34 @@ export function buildViewModel(payload: DashboardPayload, now: Date = new Date()
   const trialsExpected = expectedByToday(summary.trialsTarget.value, cal.calendarProgress);
   const cpExpected = expectedByToday(summary.cpToTrialsTarget.value, cal.calendarProgress);
 
+  // For a closed month, the spreadsheet's own "PROJECTED REVENUE"/"GAP TO
+  // GOAL" cells were computed mid-month and read as-is here — they're not
+  // recalculated when the month closes, so they go stale (and can end up
+  // contradicting the month's own final Revenue MTD, e.g. showing a
+  // shortfall for a month that actually hit its goal). Once the month is
+  // over, its own final MTD figure IS the outcome, so it's substituted in
+  // place of the stale projection for status/display purposes — never the
+  // other way around for the live current month, where the sheet's
+  // in-progress projection is still the more informative number.
+  const effectiveProjectedRevenue = isHistorical ? summary.revenueMTD : summary.projectedRevenue;
+  const effectiveGap =
+    isHistorical && summary.revenueMTD !== null && summary.revenueGoal !== null
+      ? summary.revenueMTD - summary.revenueGoal
+      : isHistorical
+      ? null
+      : summary.revenueGap;
+
   const overall = computeOverallStatus({
     revenueGoal: summary.revenueGoal,
     revenueMTD: summary.revenueMTD,
-    projectedRevenue: summary.projectedRevenue,
+    projectedRevenue: effectiveProjectedRevenue,
     trialsCurrent: summary.trialsMTD,
     trialsExpectedByToday: trialsExpected,
     cpCurrent: summary.cpToTrialsMTD,
     cpExpectedByToday: cpExpected,
   });
 
-  const revenueStatus = computeProjectedRevenueStatus(summary.projectedRevenue, summary.revenueGoal);
+  const revenueStatus = computeProjectedRevenueStatus(effectiveProjectedRevenue, summary.revenueGoal);
 
   function kpi(
     id: string,
@@ -102,6 +156,12 @@ export function buildViewModel(payload: DashboardPayload, now: Date = new Date()
     actualDaily,
     overall,
     revenueStatus,
+    // Use these in place of summary.projectedRevenue/revenueGap wherever
+    // those are displayed — for the live month they're identical to the
+    // sheet's own values; for a closed month they're the corrected
+    // (actual-MTD-based) figures described above.
+    effectiveProjectedRevenue,
+    effectiveGap,
     kpis,
     priorities,
     daily,

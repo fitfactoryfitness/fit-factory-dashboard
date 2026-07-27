@@ -11,17 +11,23 @@ export function RevenueMetricsCard({
   revenueGap,
   requiredDaily,
   actualDaily,
+  isHistorical = false,
 }: {
   projectedRevenue: number | null;
   revenueGap: number | null;
   requiredDaily: number | null;
   actualDaily: number | null;
+  // When viewing a closed past month, "projectedRevenue" here is actually
+  // the month's own final MTD figure (see buildViewModel's
+  // effectiveProjectedRevenue) — relabeled so it reads as a result, not a
+  // forward-looking projection that no longer applies.
+  isHistorical?: boolean;
 }) {
   return (
     <div className="rounded-2xl border border-bg-border bg-bg-card p-2.5 md:p-3 flex flex-col h-full overflow-hidden">
       <span className="text-slate-300 text-sm md:text-base font-semibold uppercase tracking-wide truncate mb-1">Revenue Pace</span>
       <div className="flex-1 grid grid-cols-2 gap-x-4 md:gap-x-6 content-between py-1">
-        <Stat label="Projected month-end" value={fmtCurrency(projectedRevenue)} />
+        <Stat label={isHistorical ? "Final revenue" : "Projected month-end"} value={fmtCurrency(projectedRevenue)} />
         <Stat label="Gap to goal" value={fmtSigned(revenueGap, fmtCurrency)} negative={(revenueGap ?? 0) < 0} />
         <Stat label="Required / day" value={fmtCurrency(requiredDaily !== null ? Math.ceil(requiredDaily) : null)} />
         <Stat label="Actual avg / day" value={fmtCurrency(actualDaily)} />
