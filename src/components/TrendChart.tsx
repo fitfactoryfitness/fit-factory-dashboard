@@ -3,7 +3,15 @@
 import { DailyPerformance } from "@/types/dashboard";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine, CartesianGrid } from "recharts";
 
-export function TrendChart({ daily, requiredDaily }: { daily: DailyPerformance[]; requiredDaily: number | null }) {
+export function TrendChart({ daily, flatRequiredDaily }: { daily: DailyPerformance[]; flatRequiredDaily: number | null }) {
+  // flatRequiredDaily is the FLAT monthly rate — revenue goal divided by
+  // total days in the month (e.g. $85,000 / 31 = $2,742/day) — constant for
+  // the whole month. Deliberately NOT the same as "Required / day" shown
+  // elsewhere on the dashboard (RevenueMetricsCard), which is "how much more
+  // per remaining day to catch up" and shrinks/grows as the month
+  // progresses — that figure would make this reference line move day to
+  // day, which defeats the point of a fixed benchmark to compare bars
+  // against.
   // Revenue per day is the PRETAX (FF) column specifically (confirmed
   // against the live sheet: day 5 = cell H19 = 1,588.01, which is PRETAX,
   // not REV TOTAL or gross revenue) — read directly, no substitution.
@@ -27,14 +35,19 @@ export function TrendChart({ daily, requiredDaily }: { daily: DailyPerformance[]
               formatter={(value: number) => [`$${value.toLocaleString()}`, "Revenue"]}
               labelFormatter={(l) => `Day ${l}`}
             />
-            {requiredDaily !== null && (
-              <ReferenceLine y={requiredDaily} stroke="#f59e0b" strokeDasharray="4 4" label={{ value: "Required daily pace", fill: "#f59e0b", fontSize: 14, position: "insideTopRight" }} />
+            {flatRequiredDaily !== null && (
+              <ReferenceLine
+                y={flatRequiredDaily}
+                stroke="#f59e0b"
+                strokeDasharray="4 4"
+                label={{ value: "Required daily pace", fill: "#f59e0b", fontSize: 14, position: "insideTopRight" }}
+              />
             )}
             <Line type="monotone" dataKey="revenue" stroke="#22c55e" strokeWidth={3} dot={false} connectNulls />
           </LineChart>
         </ResponsiveContainer>
       </div>
-      <p className="sr-only">Line chart of daily Downtown revenue for the current month, with a reference line for the revenue required per remaining day to reach the monthly goal.</p>
+      <p className="sr-only">Line chart of daily Downtown revenue for the current month, with a flat reference line for the monthly goal divided evenly across every day of the month.</p>
     </div>
   );
 }

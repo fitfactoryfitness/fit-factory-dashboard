@@ -222,7 +222,7 @@ export function DashboardClient({ initial, debug }: { initial: { payload: Dashbo
           // space), since there h-screen on the outer container gives every
           // flex ancestor a definite height to grow into.
           <div className="h-[280px] md:h-auto md:flex-1 md:min-h-0">
-            <TrendChart daily={vm.daily} requiredDaily={vm.requiredDaily} />
+            <TrendChart daily={vm.daily} flatRequiredDaily={vm.flatRequiredDaily} />
           </div>
         )}
 

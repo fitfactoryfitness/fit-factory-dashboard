@@ -60,6 +60,16 @@ export function buildViewModel(payload: DashboardPayload, now: Date = new Date()
   const requiredDaily = requiredPerRemainingDay(remaining, cal.remainingDays);
   const actualDaily = actualAverageDaily(summary.revenueMTD, cal.elapsedDays + 1);
 
+  // Flat monthly target rate (goal / total days in month) — a fixed
+  // benchmark line for the trend chart, deliberately NOT the same value as
+  // `requiredDaily` above. `requiredDaily` is "how much more per remaining
+  // day to still catch up," which shrinks/grows as the month progresses and
+  // isn't meant to be plotted as a static reference; this is "what a flat,
+  // even pace across the whole month would have looked like," which never
+  // changes once the goal and days-in-month are known.
+  const flatRequiredDaily =
+    summary.revenueGoal !== null && cal.totalDaysInMonth > 0 ? summary.revenueGoal / cal.totalDaysInMonth : null;
+
   const trialsExpected = expectedByToday(summary.trialsTarget.value, cal.calendarProgress);
   const cpExpected = expectedByToday(summary.cpToTrialsTarget.value, cal.calendarProgress);
 
@@ -153,6 +163,7 @@ export function buildViewModel(payload: DashboardPayload, now: Date = new Date()
     paceVariance: variance,
     remaining,
     requiredDaily,
+    flatRequiredDaily,
     actualDaily,
     overall,
     revenueStatus,
