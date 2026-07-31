@@ -1,7 +1,11 @@
 "use client";
 
 import { DailyPerformance } from "@/types/dashboard";
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine, CartesianGrid } from "recharts";
+import { BarChart, Bar, Cell, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine, CartesianGrid } from "recharts";
+
+const ABOVE_PACE_COLOR = "#22c55e"; // green — day's revenue at/above the flat pace line
+const BELOW_PACE_COLOR = "#ef4444"; // red — day's revenue below it
+const NO_TARGET_COLOR = "#38bdf8"; // neutral blue — only used if there's no goal to compare against at all
 
 export function TrendChart({ daily, flatRequiredDaily }: { daily: DailyPerformance[]; flatRequiredDaily: number | null }) {
   // flatRequiredDaily is the FLAT monthly rate — revenue goal divided by
@@ -15,18 +19,22 @@ export function TrendChart({ daily, flatRequiredDaily }: { daily: DailyPerforman
   // Revenue per day is the PRETAX (FF) column specifically (confirmed
   // against the live sheet: day 5 = cell H19 = 1,588.01, which is PRETAX,
   // not REV TOTAL or gross revenue) — read directly, no substitution.
-  const data = daily.map((d) => ({
-    day: d.dayOfMonth,
-    revenue: d.pretaxRevenue,
-    recent: d.dayOfMonth > daily.length - 7,
-  }));
+  // Per-bar color is decided here (not in the render) from that same
+  // day's own revenue vs. the flat pace line — a day with no revenue
+  // posted yet (null) gets no color decision at all, Recharts just skips it.
+  const data = daily.map((d) => {
+    const revenue = d.pretaxRevenue;
+    const color =
+      revenue === null || flatRequiredDaily === null ? NO_TARGET_COLOR : revenue >= flatRequiredDaily ? ABOVE_PACE_COLOR : BELOW_PACE_COLOR;
+    return { day: d.dayOfMonth, revenue, color };
+  });
 
   return (
     <div className="rounded-2xl border border-bg-border bg-bg-card p-3 md:p-4 h-full flex flex-col overflow-hidden">
       <h2 className="text-slate-300 text-base md:text-xl font-bold uppercase tracking-wide mb-1 shrink-0">Daily Revenue Trend — Downtown</h2>
       <div className="flex-1 min-h-0">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+          <BarChart data={data} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
             <CartesianGrid stroke="#232c38" strokeDasharray="3 3" />
             <XAxis dataKey="day" stroke="#64748b" fontSize={15} />
             <YAxis stroke="#64748b" fontSize={15} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
@@ -43,11 +51,18 @@ export function TrendChart({ daily, flatRequiredDaily }: { daily: DailyPerforman
                 label={{ value: "Required daily pace", fill: "#f59e0b", fontSize: 14, position: "insideTopRight" }}
               />
             )}
-            <Line type="monotone" dataKey="revenue" stroke="#22c55e" strokeWidth={3} dot={false} connectNulls />
-          </LineChart>
+            <Bar dataKey="revenue" radius={[3, 3, 0, 0]} maxBarSize={28}>
+              {data.map((entry) => (
+                <Cell key={entry.day} fill={entry.color} />
+              ))}
+            </Bar>
+          </BarChart>
         </ResponsiveContainer>
       </div>
-      <p className="sr-only">Line chart of daily Downtown revenue for the current month, with a flat reference line for the monthly goal divided evenly across every day of the month.</p>
+      <p className="sr-only">
+        Bar chart of daily Downtown revenue for the current month, colored green on days at or above the flat monthly pace line and red on
+        days below it, with a reference line for the monthly goal divided evenly across every day of the month.
+      </p>
     </div>
   );
 }
