@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { DashboardPayload } from "@/types/dashboard";
+import { VacationsPayload } from "@/lib/vacations";
 import { buildViewModel } from "@/lib/viewModel";
 import { AUTO_REFRESH_INTERVAL_MS } from "@/config/thresholds";
 import { monthFullName } from "@/lib/monthLabels";
@@ -13,8 +14,15 @@ import { RevenueMetricsCard } from "./RevenueMetricsCard";
 import { MrrForecastStrip } from "./MrrForecastStrip";
 import { TrendChart } from "./TrendChart";
 import { MidtownStrip } from "./MidtownStrip";
+import { VacationsCard } from "./VacationsCard";
 import { DebugPanel } from "./DebugPanel";
 import { ComparePanel } from "./ComparePanel";
+
+// Vacation data changes rarely (someone books time off, that's it) — no
+// need for the same 15s cadence as revenue data. Refetched every 5 minutes
+// so a same-day booking still shows up within a shift, without hammering
+// another team's app on every kiosk refresh tick.
+const VACATIONS_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 
 // Toggle to bring the Daily Revenue Trend card back — kept in the code (not
 // deleted) per product request, just hidden from render for now.
@@ -63,6 +71,22 @@ export function DashboardClient({ initial, debug }: { initial: { payload: Dashbo
   const [historicalLoading, setHistoricalLoading] = useState(false);
   const [historicalError, setHistoricalError] = useState<string | null>(null);
   const [compareOpen, setCompareOpen] = useState(false);
+
+  // Vacations card — entirely independent of the Google Sheet / month
+  // selector above (different app, different refresh cadence), so it's
+  // fetched on its own timer rather than piggybacking on `refresh`.
+  const [vacations, setVacations] = useState<VacationsPayload | null>(null);
+  useEffect(() => {
+    const fetchVacations = () => {
+      fetch("/api/vacations", { cache: "no-store" })
+        .then((r) => r.json())
+        .then(setVacations)
+        .catch(() => setVacations((prev) => prev ?? { asOf: "", awayNow: [], startingSoon: [], error: "Failed to load vacation data" }));
+    };
+    fetchVacations();
+    const t = setInterval(fetchVacations, VACATIONS_REFRESH_INTERVAL_MS);
+    return () => clearInterval(t);
+  }, []);
 
   useEffect(() => {
     fetch("/api/months")
@@ -239,6 +263,16 @@ export function DashboardClient({ initial, debug }: { initial: { payload: Dashbo
               plus2Previous={payload.summary.mrrForecast.plus2Previous}
               plus3Previous={payload.summary.mrrForecast.plus3Previous}
             />
+          </div>
+        )}
+
+        {/* Independent of the Google Sheet / selected month entirely — a
+            different app (fit-factory-vacation-tracker), always shows live
+            "right now" status regardless of which month is being viewed
+            above. */}
+        {vacations && (
+          <div className="shrink-0">
+            <VacationsCard awayNow={vacations.awayNow} startingSoon={vacations.startingSoon} error={vacations.error} />
           </div>
         )}
 
