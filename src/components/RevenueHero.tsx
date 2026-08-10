@@ -2,6 +2,7 @@
 
 import { MonthlySummary, MetricStatus } from "@/types/dashboard";
 import { fmtCurrency, STATUS_COLORS } from "@/lib/format";
+import { computeKpiStatus } from "@/lib/calculations/status";
 import { ProgressBar } from "./ProgressBar";
 
 export function RevenueHero({
@@ -9,22 +10,34 @@ export function RevenueHero({
   goalProgress,
   calendarProgressPct,
   remaining,
-  revenueStatus,
   isHistorical = false,
 }: {
   summary: MonthlySummary;
   goalProgress: number | null;
   calendarProgressPct: number;
   remaining: number | null;
-  revenueStatus: MetricStatus;
   // A closed month has nothing left to "pace" against — calendarProgressPct
   // is forced to 100 for these (see buildViewModel), so the badge switches
   // from a pace comparison to a plain result: did it hit the goal or not.
   isHistorical?: boolean;
 }) {
   const pct = goalProgress !== null ? goalProgress * 100 : null;
-  const colors = STATUS_COLORS[revenueStatus] ?? STATUS_COLORS.unavailable;
   const paceDelta = pct !== null ? pct - calendarProgressPct : null;
+
+  // Badge color follows the calendar-pace comparison shown in the badge
+  // text (ahead/behind pace), not the separate projected-vs-goal
+  // `revenueStatus` — those two can disagree (e.g. ahead of pace today but
+  // still projected to miss goal), which read as a contradiction: a red
+  // card announcing "ahead of pace".
+  const paceStatus: MetricStatus =
+    pct === null
+      ? "unavailable"
+      : isHistorical
+      ? pct >= 100
+        ? "ahead"
+        : "off-track"
+      : computeKpiStatus(pct, calendarProgressPct);
+  const colors = STATUS_COLORS[paceStatus] ?? STATUS_COLORS.unavailable;
 
   const badgeText =
     pct === null
@@ -56,7 +69,7 @@ export function RevenueHero({
           Trials (see RevenueMetricsCard) — keeping this card to just the big
           number and the progress bar. */}
       <div className="flex-1 min-h-0 flex flex-col justify-center gap-2">
-        <ProgressBar currentPct={pct} expectedPct={calendarProgressPct} status={revenueStatus} height="h-4 md:h-6" />
+        <ProgressBar currentPct={pct} expectedPct={calendarProgressPct} status={paceStatus} height="h-4 md:h-6" />
         <div className="flex justify-between text-sm md:text-lg">
           <span className="text-slate-300 font-semibold">{pct !== null ? `${pct.toFixed(1)}% achieved` : "—"}</span>
           <span className="text-slate-400">{isHistorical ? "Month complete" : `${calendarProgressPct.toFixed(1)}% of month elapsed`}</span>

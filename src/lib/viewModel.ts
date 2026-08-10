@@ -10,7 +10,7 @@ import {
   paceGap,
   daysInMonth,
 } from "@/lib/calculations/pace";
-import { computeOverallStatus, computeKpiStatus, computeProjectedRevenueStatus } from "@/lib/calculations/status";
+import { computeOverallStatus, computeKpiStatus } from "@/lib/calculations/status";
 import { generatePriorities } from "@/lib/priorityEngine";
 import { BUSINESS_TIMEZONE } from "@/config/thresholds";
 import { MONTH_ABBR } from "@/lib/googleSheets/tabResolver";
@@ -100,8 +100,6 @@ export function buildViewModel(payload: DashboardPayload, now: Date = new Date()
     cpExpectedByToday: cpExpected,
   });
 
-  const revenueStatus = computeProjectedRevenueStatus(effectiveProjectedRevenue, summary.revenueGoal);
-
   function kpi(
     id: string,
     label: string,
@@ -166,7 +164,6 @@ export function buildViewModel(payload: DashboardPayload, now: Date = new Date()
     flatRequiredDaily,
     actualDaily,
     overall,
-    revenueStatus,
     // Use these in place of summary.projectedRevenue/revenueGap wherever
     // those are displayed — for the live month they're identical to the
     // sheet's own values; for a closed month they're the corrected

@@ -187,24 +187,28 @@ export function DashboardClient({ initial, debug }: { initial: { payload: Dashbo
             goalProgress={vm.goalProgress}
             calendarProgressPct={vm.cal.calendarProgress * 100}
             remaining={vm.remaining}
-            revenueStatus={vm.revenueStatus}
             isHistorical={isViewingHistorical}
           />
         </div>
 
         {/* Trials and CP-to-Trials are the critical leading indicators per
-            the brief. Revenue Pace (the four stats formerly inside
-            RevenueHero) sits alongside them. New Memberships and PSC (count
-            + revenue) share the last column, stacked. Utilization and
-            Terminations cards were removed per product feedback (still
-            tracked in the data, just not displayed as their own cards). On
-            mobile these simply stack full-width, one after another. */}
+            the brief, stacked in the first column. Revenue Pace (the four
+            stats formerly inside RevenueHero) sits in the second column. New
+            Memberships and PSC (count + revenue) share the third column,
+            stacked. Vacations (independent of the Google Sheet / selected
+            month, always shows live "right now" status) rounds out the row.
+            Utilization and Terminations cards were removed per product
+            feedback (still tracked in the data, just not displayed as their
+            own cards). On mobile these simply stack full-width, one after
+            another. */}
         <div className="shrink-0 grid grid-cols-1 gap-3 md:grid-cols-4 md:gap-2">
-          <div>
-            <KpiCard kpi={vm.kpis[0]} />
-          </div>
-          <div>
-            <KpiCard kpi={vm.kpis[1]} />
+          <div className="grid grid-cols-1 gap-3 md:grid-rows-2 md:gap-1.5">
+            <div>
+              <KpiCard kpi={vm.kpis[0]} />
+            </div>
+            <div>
+              <KpiCard kpi={vm.kpis[1]} />
+            </div>
           </div>
           <div>
             <RevenueMetricsCard
@@ -231,6 +235,9 @@ export function DashboardClient({ initial, debug }: { initial: { payload: Dashbo
                 paceGap={vm.kpis[3].paceGap}
               />
             </div>
+          </div>
+          <div>
+            {vacations && <VacationsCard awayNow={vacations.awayNow} startingSoon={vacations.startingSoon} error={vacations.error} />}
           </div>
         </div>
 
@@ -263,16 +270,6 @@ export function DashboardClient({ initial, debug }: { initial: { payload: Dashbo
               plus2Previous={payload.summary.mrrForecast.plus2Previous}
               plus3Previous={payload.summary.mrrForecast.plus3Previous}
             />
-          </div>
-        )}
-
-        {/* Independent of the Google Sheet / selected month entirely — a
-            different app (fit-factory-vacation-tracker), always shows live
-            "right now" status regardless of which month is being viewed
-            above. */}
-        {vacations && (
-          <div className="shrink-0">
-            <VacationsCard awayNow={vacations.awayNow} startingSoon={vacations.startingSoon} error={vacations.error} />
           </div>
         )}
 
