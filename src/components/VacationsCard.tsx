@@ -35,10 +35,10 @@ function VacationSection({
         </div>
       )}
       {!error && entries.length > 0 && (
-        <div className="flex-1 min-h-0 overflow-hidden flex flex-col gap-0.5 mt-1">
+        <div className="flex-1 min-h-0 overflow-hidden flex flex-col gap-1 mt-1">
           {entries.map((e) => (
-            <div key={`${e.employeeId}-${e.startDate}`} className="text-xs md:text-sm text-slate-300 truncate">
-              <span className="font-semibold">{e.name}</span> <span className="text-slate-500">({e.team})</span> — {dateLabel(e)}
+            <div key={`${e.employeeId}-${e.startDate}`} className="text-sm md:text-lg text-slate-300 truncate">
+              <span className="font-semibold text-white">{e.name}</span> <span className="text-slate-500">({e.team})</span> — {dateLabel(e)}
             </div>
           ))}
         </div>
@@ -54,7 +54,7 @@ export function VacationsCard({ awayNow, startingSoon, error }: { awayNow: Vacat
       <div className="flex-1 min-h-0 grid grid-rows-2 gap-2 py-1">
         <VacationSection label="Away now" entries={awayNow} error={error} tone="red" dateLabel={(e) => `Back ${fmtShortDate(e.endDate)}`} />
         <VacationSection
-          label="Starting in 7 days"
+          label="Starting in less than 7 days"
           entries={startingSoon}
           error={error}
           tone="amber"
