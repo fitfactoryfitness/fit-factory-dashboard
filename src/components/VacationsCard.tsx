@@ -8,44 +8,58 @@ function fmtShortDate(dateStr: string): string {
   return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
 }
 
-function VacationPill({ entry, tone, dateLabel }: { entry: VacationEntry; tone: "red" | "amber"; dateLabel: string }) {
-  const colors = tone === "red" ? "bg-red-500/10 border-red-500/30 text-red-300" : "bg-amber-500/10 border-amber-500/30 text-amber-300";
+function VacationSection({
+  label,
+  entries,
+  error,
+  tone,
+  dateLabel,
+}: {
+  label: string;
+  entries: VacationEntry[];
+  error: string | null;
+  tone: "red" | "amber";
+  dateLabel: (entry: VacationEntry) => string;
+}) {
+  const countColor = tone === "red" ? "text-red-400" : "text-amber-400";
   return (
-    <span className={`px-2 py-0.5 rounded border text-xs md:text-sm whitespace-nowrap ${colors}`}>
-      <span className="font-semibold">{entry.name}</span> <span className="opacity-70">({entry.team})</span> — {dateLabel}
-    </span>
+    <div className="min-w-0 min-h-0 flex flex-col">
+      <div className="text-slate-500 uppercase text-xs md:text-base tracking-wide truncate">{label}</div>
+      {error ? (
+        <div className="text-amber-400 text-lg md:text-2xl font-bold truncate" title={error}>
+          Unavailable
+        </div>
+      ) : (
+        <div className={`text-3xl md:text-5xl font-bold truncate ${entries.length === 0 ? "text-slate-600" : countColor}`}>
+          {entries.length}
+        </div>
+      )}
+      {!error && entries.length > 0 && (
+        <div className="flex-1 min-h-0 overflow-hidden flex flex-col gap-0.5 mt-1">
+          {entries.map((e) => (
+            <div key={`${e.employeeId}-${e.startDate}`} className="text-xs md:text-sm text-slate-300 truncate">
+              <span className="font-semibold">{e.name}</span> <span className="text-slate-500">({e.team})</span> — {dateLabel(e)}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 
 export function VacationsCard({ awayNow, startingSoon, error }: { awayNow: VacationEntry[]; startingSoon: VacationEntry[]; error: string | null }) {
   return (
-    <div className="flex items-center flex-wrap gap-x-6 gap-y-2 px-4 md:px-5 py-3 md:py-2 rounded-xl border border-bg-border bg-bg-panel text-sm md:text-base text-slate-400 w-full overflow-hidden">
-      <span className="font-bold text-slate-300 uppercase text-sm tracking-wide shrink-0">Vacations</span>
-
-      <div className="flex items-center gap-2 flex-wrap min-w-0">
-        <span className="text-xs uppercase text-slate-500 shrink-0">Away now</span>
-        {error ? (
-          <span className="text-amber-400 text-xs" title={error}>
-            Unavailable
-          </span>
-        ) : awayNow.length === 0 ? (
-          <span className="text-slate-600 text-xs">Nobody</span>
-        ) : (
-          awayNow.map((e) => <VacationPill key={`${e.employeeId}-${e.startDate}`} entry={e} tone="red" dateLabel={`back ${fmtShortDate(e.endDate)}`} />)
-        )}
-      </div>
-
-      <div className="flex items-center gap-2 flex-wrap min-w-0">
-        <span className="text-xs uppercase text-slate-500 shrink-0">Starting in 7 days</span>
-        {error ? (
-          <span className="text-slate-700 text-xs">—</span>
-        ) : startingSoon.length === 0 ? (
-          <span className="text-slate-600 text-xs">None</span>
-        ) : (
-          startingSoon.map((e) => (
-            <VacationPill key={`${e.employeeId}-${e.startDate}`} entry={e} tone="amber" dateLabel={`${fmtShortDate(e.startDate)}, ${e.durationDays}d`} />
-          ))
-        )}
+    <div className="rounded-2xl border border-bg-border bg-bg-card p-2.5 md:p-3 flex flex-col h-full overflow-hidden">
+      <span className="text-slate-300 text-sm md:text-base font-semibold uppercase tracking-wide truncate mb-1">Vacations</span>
+      <div className="flex-1 min-h-0 grid grid-rows-2 gap-2 py-1">
+        <VacationSection label="Away now" entries={awayNow} error={error} tone="red" dateLabel={(e) => `Back ${fmtShortDate(e.endDate)}`} />
+        <VacationSection
+          label="Starting in 7 days"
+          entries={startingSoon}
+          error={error}
+          tone="amber"
+          dateLabel={(e) => `${fmtShortDate(e.startDate)}, ${e.durationDays}d`}
+        />
       </div>
     </div>
   );
