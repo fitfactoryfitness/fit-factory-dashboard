@@ -22,7 +22,10 @@ const EVAL_LABEL: Record<TodayEvalStatus, string> = {
 // badge + big number + progress bar) so it sits naturally stacked above
 // Vacations in the same grid-rows-2 column.
 export function TodayCard({ today, requiredDaily, evalStatus }: { today: DailyPerformance | null; requiredDaily: number | null; evalStatus: TodayEvalStatus }) {
-  const revenue = today?.revenueTotal ?? today?.grossRevenue ?? null;
+  // Pretax (FF) is the revenue figure used everywhere else in the app
+  // (Revenue MTD, daily trend, etc.) — see normalize.ts's comment on why
+  // it's PRETAX and not REV TOTAL. Today's number has to match that.
+  const revenue = today?.pretaxRevenue ?? null;
   const hasData = revenue !== null;
   const metricStatus = EVAL_TO_METRIC_STATUS[evalStatus];
   const colors = STATUS_COLORS[metricStatus] ?? STATUS_COLORS.unavailable;

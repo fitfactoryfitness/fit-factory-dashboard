@@ -161,7 +161,7 @@ export function buildViewModel(payload: DashboardPayload, now: Date = new Date()
   // judging today's real-world revenue against a month that already ended.
   const todayEval: { status: TodayEvalStatus; reason: string } = isHistorical
     ? { status: "neutral", reason: "Viewing a past month — nothing to evaluate." }
-    : evaluateTodaySoFar(payload.today?.revenueTotal ?? payload.today?.grossRevenue ?? null, flatRequiredDaily, now, BUSINESS_TIMEZONE);
+    : evaluateTodaySoFar(payload.today?.pretaxRevenue ?? null, flatRequiredDaily, now, BUSINESS_TIMEZONE);
 
   return {
     cal,
