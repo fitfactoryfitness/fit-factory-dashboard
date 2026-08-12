@@ -11,6 +11,7 @@ import {
   daysInMonth,
 } from "@/lib/calculations/pace";
 import { computeOverallStatus, computeKpiStatus } from "@/lib/calculations/status";
+import { evaluateTodaySoFar, TodayEvalStatus } from "@/lib/calculations/today";
 import { generatePriorities } from "@/lib/priorityEngine";
 import { BUSINESS_TIMEZONE } from "@/config/thresholds";
 import { MONTH_ABBR } from "@/lib/googleSheets/tabResolver";
@@ -155,6 +156,13 @@ export function buildViewModel(payload: DashboardPayload, now: Date = new Date()
 
   const priorities = generatePriorities({ summary, calendarProgress: cal.calendarProgress, remainingDays: cal.remainingDays });
 
+  // "Today" has no meaning when viewing a closed past month — there's no
+  // in-progress day to evaluate, so the card just goes neutral instead of
+  // judging today's real-world revenue against a month that already ended.
+  const todayEval: { status: TodayEvalStatus; reason: string } = isHistorical
+    ? { status: "neutral", reason: "Viewing a past month — nothing to evaluate." }
+    : evaluateTodaySoFar(payload.today?.revenueTotal ?? payload.today?.grossRevenue ?? null, flatRequiredDaily, now, BUSINESS_TIMEZONE);
+
   return {
     cal,
     goalProgress: goalProg,
@@ -173,5 +181,6 @@ export function buildViewModel(payload: DashboardPayload, now: Date = new Date()
     kpis,
     priorities,
     daily,
+    todayEval,
   };
 }

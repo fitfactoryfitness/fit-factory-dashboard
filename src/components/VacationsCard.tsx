@@ -24,21 +24,21 @@ function VacationSection({
   const countColor = tone === "red" ? "text-red-400" : "text-amber-400";
   return (
     <div className="min-w-0 min-h-0 flex flex-col">
-      <div className="text-slate-500 uppercase text-xs md:text-base tracking-wide truncate">{label}</div>
+      <div className="text-slate-500 uppercase text-xs tracking-wide leading-tight">{label}</div>
       {error ? (
         <div className="text-amber-400 text-lg md:text-2xl font-bold truncate" title={error}>
           Unavailable
         </div>
       ) : (
-        <div className={`text-3xl md:text-5xl font-bold truncate ${entries.length === 0 ? "text-slate-600" : countColor}`}>
+        <div className={`text-2xl md:text-4xl font-extrabold leading-none truncate ${entries.length === 0 ? "text-slate-600" : countColor}`}>
           {entries.length}
         </div>
       )}
       {!error && entries.length > 0 && (
-        <div className="flex-1 min-h-0 overflow-hidden flex flex-col gap-1 mt-1">
+        <div className="flex-1 min-h-0 overflow-hidden flex flex-col gap-0.5 mt-1">
           {entries.map((e) => (
-            <div key={`${e.employeeId}-${e.startDate}`} className="text-sm md:text-lg text-slate-300 truncate">
-              <span className="font-semibold text-white">{e.name}</span> <span className="text-slate-500">({e.team})</span> — {dateLabel(e)}
+            <div key={`${e.employeeId}-${e.startDate}`} className="text-xs md:text-sm text-slate-300 truncate">
+              <span className="font-semibold text-white">{e.name}</span> — {dateLabel(e)}
             </div>
           ))}
         </div>
@@ -49,9 +49,9 @@ function VacationSection({
 
 export function VacationsCard({ awayNow, startingSoon, error }: { awayNow: VacationEntry[]; startingSoon: VacationEntry[]; error: string | null }) {
   return (
-    <div className="rounded-2xl border border-bg-border bg-bg-card p-2.5 md:p-3 flex flex-col h-full overflow-hidden">
-      <span className="text-slate-300 text-sm md:text-base font-semibold uppercase tracking-wide truncate mb-1">Vacations</span>
-      <div className="flex-1 min-h-0 grid grid-rows-2 gap-2 py-1">
+    <div className="rounded-2xl border border-bg-border bg-bg-card p-2 md:p-2.5 flex flex-col gap-1 md:gap-1.5 h-full overflow-hidden">
+      <span className="text-slate-300 text-sm md:text-base font-semibold uppercase tracking-wide truncate">Vacations</span>
+      <div className="flex-1 min-h-0 grid grid-cols-2 gap-3 md:gap-4">
         <VacationSection label="Away now" entries={awayNow} error={error} tone="red" dateLabel={(e) => `Back ${fmtShortDate(e.endDate)}`} />
         <VacationSection
           label="Starting in less than 7 days"

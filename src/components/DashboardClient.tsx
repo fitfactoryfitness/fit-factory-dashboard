@@ -15,6 +15,7 @@ import { MrrForecastStrip } from "./MrrForecastStrip";
 import { TrendChart } from "./TrendChart";
 import { MidtownStrip } from "./MidtownStrip";
 import { VacationsCard } from "./VacationsCard";
+import { TodayCard } from "./TodayCard";
 import { DebugPanel } from "./DebugPanel";
 import { ComparePanel } from "./ComparePanel";
 
@@ -195,12 +196,13 @@ export function DashboardClient({ initial, debug }: { initial: { payload: Dashbo
             the brief, stacked in the first column. Revenue Pace (the four
             stats formerly inside RevenueHero) sits in the second column. New
             Memberships and PSC (count + revenue) share the third column,
-            stacked. Vacations (independent of the Google Sheet / selected
-            month, always shows live "right now" status) rounds out the row.
-            Utilization and Terminations cards were removed per product
-            feedback (still tracked in the data, just not displayed as their
-            own cards). On mobile these simply stack full-width, one after
-            another. */}
+            stacked. Today (in-progress day vs required daily pace) and
+            Vacations (independent of the Google Sheet / selected month,
+            always shows live "right now" status) share the fourth column,
+            stacked the same way. Utilization and Terminations cards were
+            removed per product feedback (still tracked in the data, just not
+            displayed as their own cards). On mobile these simply stack
+            full-width, one after another. */}
         <div className="shrink-0 grid grid-cols-1 gap-3 md:grid-cols-4 md:gap-2">
           <div className="grid grid-cols-1 gap-3 md:grid-rows-2 md:gap-1.5">
             <div>
@@ -236,8 +238,13 @@ export function DashboardClient({ initial, debug }: { initial: { payload: Dashbo
               />
             </div>
           </div>
-          <div>
-            {vacations && <VacationsCard awayNow={vacations.awayNow} startingSoon={vacations.startingSoon} error={vacations.error} />}
+          <div className="grid grid-cols-1 gap-3 md:grid-rows-2 md:gap-1.5">
+            <div>
+              <TodayCard today={payload.today} requiredDaily={vm.flatRequiredDaily} evalStatus={vm.todayEval.status} />
+            </div>
+            <div>
+              {vacations && <VacationsCard awayNow={vacations.awayNow} startingSoon={vacations.startingSoon} error={vacations.error} />}
+            </div>
           </div>
         </div>
 
