@@ -11,7 +11,7 @@ import {
   daysInMonth,
 } from "@/lib/calculations/pace";
 import { computeOverallStatus, computeKpiStatus } from "@/lib/calculations/status";
-import { evaluateTodaySoFar, TodayEvalStatus } from "@/lib/calculations/today";
+import { evaluateTodaySoFar, expectedRevenueSoFar, TodayEvalStatus } from "@/lib/calculations/today";
 import { generatePriorities } from "@/lib/priorityEngine";
 import { BUSINESS_TIMEZONE } from "@/config/thresholds";
 import { MONTH_ABBR } from "@/lib/googleSheets/tabResolver";
@@ -162,6 +162,11 @@ export function buildViewModel(payload: DashboardPayload, now: Date = new Date()
   const todayEval: { status: TodayEvalStatus; reason: string } = isHistorical
     ? { status: "neutral", reason: "Viewing a past month — nothing to evaluate." }
     : evaluateTodaySoFar(payload.today?.pretaxRevenue ?? null, flatRequiredDaily, now, BUSINESS_TIMEZONE);
+  // The same time-of-day-adjusted figure evaluateTodaySoFar compares
+  // against internally — surfaced so the UI can show it (e.g. as a
+  // progress-bar marker), otherwise "GOOD DAY" next to a bar well short of
+  // the full daily target reads as a contradiction.
+  const todayExpectedSoFar = isHistorical ? null : expectedRevenueSoFar(flatRequiredDaily, now, BUSINESS_TIMEZONE);
 
   return {
     cal,
@@ -182,5 +187,6 @@ export function buildViewModel(payload: DashboardPayload, now: Date = new Date()
     priorities,
     daily,
     todayEval,
+    todayExpectedSoFar,
   };
 }

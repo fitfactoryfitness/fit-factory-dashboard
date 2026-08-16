@@ -240,7 +240,12 @@ export function DashboardClient({ initial, debug }: { initial: { payload: Dashbo
           </div>
           <div className="grid grid-cols-1 gap-3 md:grid-rows-2 md:gap-1.5">
             <div>
-              <TodayCard today={payload.today} requiredDaily={vm.flatRequiredDaily} evalStatus={vm.todayEval.status} />
+              <TodayCard
+                today={payload.today}
+                requiredDaily={vm.flatRequiredDaily}
+                expectedSoFar={vm.todayExpectedSoFar}
+                evalStatus={vm.todayEval.status}
+              />
             </div>
             <div>
               {vacations && <VacationsCard awayNow={vacations.awayNow} startingSoon={vacations.startingSoon} error={vacations.error} />}

@@ -3,7 +3,7 @@
 import { DailyPerformance } from "@/types/dashboard";
 import { MetricStatus } from "@/types/dashboard";
 import { TodayEvalStatus } from "@/lib/calculations/today";
-import { fmtCurrency, STATUS_COLORS } from "@/lib/format";
+import { fmtCurrency, fmtSigned, STATUS_COLORS } from "@/lib/format";
 import { ProgressBar } from "./ProgressBar";
 
 const EVAL_TO_METRIC_STATUS: Record<TodayEvalStatus, MetricStatus> = {
@@ -21,7 +21,22 @@ const EVAL_LABEL: Record<TodayEvalStatus, string> = {
 // Same compact card shell as KpiCard/PscCard (rounded-2xl, colored border,
 // badge + big number + progress bar) so it sits naturally stacked above
 // Vacations in the same grid-rows-2 column.
-export function TodayCard({ today, requiredDaily, evalStatus }: { today: DailyPerformance | null; requiredDaily: number | null; evalStatus: TodayEvalStatus }) {
+export function TodayCard({
+  today,
+  requiredDaily,
+  expectedSoFar,
+  evalStatus,
+}: {
+  today: DailyPerformance | null;
+  requiredDaily: number | null;
+  // Time-of-day-adjusted expectation (see expectedRevenueSoFar) — the same
+  // number evalStatus was judged against. Shown as a bar marker so "GOOD
+  // DAY" next to a bar under the full daily target doesn't read as a
+  // contradiction: it's ahead of what's expected by *this hour*, not of the
+  // full day's target yet.
+  expectedSoFar: number | null;
+  evalStatus: TodayEvalStatus;
+}) {
   // Pretax (FF) is the revenue figure used everywhere else in the app
   // (Revenue MTD, daily trend, etc.) — see normalize.ts's comment on why
   // it's PRETAX and not REV TOTAL. Today's number has to match that.
@@ -31,6 +46,8 @@ export function TodayCard({ today, requiredDaily, evalStatus }: { today: DailyPe
   const colors = STATUS_COLORS[metricStatus] ?? STATUS_COLORS.unavailable;
   const hasTarget = requiredDaily !== null && requiredDaily > 0;
   const progressPct = hasData && hasTarget ? (revenue / (requiredDaily as number)) * 100 : null;
+  const expectedPct = hasTarget && expectedSoFar !== null ? (expectedSoFar / (requiredDaily as number)) * 100 : null;
+  const gapVsExpected = hasData && expectedSoFar !== null ? revenue - expectedSoFar : null;
 
   return (
     <div className={`rounded-2xl border ${colors.border} bg-bg-card p-2.5 md:p-3 flex flex-col gap-1 md:gap-1.5 h-full overflow-hidden`}>
@@ -46,11 +63,16 @@ export function TodayCard({ today, requiredDaily, evalStatus }: { today: DailyPe
         {hasTarget && <span className="text-base md:text-xl text-slate-400 font-medium shrink-0">/ {fmtCurrency(requiredDaily)}</span>}
       </div>
 
-      {hasTarget && <ProgressBar currentPct={progressPct} expectedPct={null} status={metricStatus} height="h-2.5 md:h-3" showExpectedMarker={false} />}
+      {hasTarget && <ProgressBar currentPct={progressPct} expectedPct={expectedPct} status={metricStatus} height="h-2.5 md:h-3" />}
 
-      <div className="text-sm md:text-base text-slate-400 truncate">
-        {hasTarget ? "Revenue today vs required daily pace" : "No daily revenue target available"}
-      </div>
+      {hasTarget ? (
+        <div className="flex justify-between text-sm md:text-base text-slate-400">
+          <span>{progressPct !== null ? `${progressPct.toFixed(0)}% of today's target` : "—"}</span>
+          <span className="truncate">{gapVsExpected !== null ? `${fmtSigned(gapVsExpected, fmtCurrency)} vs expected pace` : ""}</span>
+        </div>
+      ) : (
+        <div className="text-sm md:text-base text-slate-500">No daily revenue target available</div>
+      )}
     </div>
   );
 }
