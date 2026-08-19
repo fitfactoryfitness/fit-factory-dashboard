@@ -62,11 +62,15 @@ export function buildMonthlySummaryAndDaily(params: {
 
   // Revenue is the PRETAX (FF) column specifically — confirmed against the
   // live sheet (e.g. day 5 = cell H19 = 1,588.01, which is PRETAX, not REV
-  // TOTAL). Revenue MTD is read straight from the TOTALS row's PRETAX cell
-  // (e.g. H47); if that's not present, fall back to the summary block's own
-  // "REVENUE MTD" label — both are values the sheet already computed, never
-  // a sum we produce ourselves.
-  const revenueMTD = readMonthly("pretax", "revenueMTD") ?? fields.revenueMTD;
+  // TOTAL). Revenue MTD prefers the summary block's own "REVENUE MTD" label
+  // (e.g. I4) over the TOTALS row's PRETAX column sum — confirmed live on
+  // 2026-08-19 that the two can drift apart intraday (TOTALS row read
+  // $48,414 while I4 already showed the correct, more current $49,705.83),
+  // so the TOTALS row's sum isn't reliably kept as current as the summary
+  // cell. Falls back to the TOTALS row only if the summary label isn't
+  // found at all — both are values the sheet already computed, never a sum
+  // we produce ourselves.
+  const revenueMTD = fields.revenueMTD ?? readMonthly("pretax", "revenueMTD");
 
   // Utilization MTD: the spreadsheet's own TOTALS/AVERAGE row for this
   // column, read directly — not an average we compute from daily rows.
