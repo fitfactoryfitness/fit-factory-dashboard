@@ -438,6 +438,20 @@ export function parseDailyTable(
     // today's row in particular may be genuinely in-progress with blanks.
     const isComplete = !isToday || revTotal.value !== null || grossRevenue.value !== null;
 
+    // Debug-only visibility into exactly which sheet row/cell "today" was
+    // read from and the raw text seen there — added after a live discrepancy
+    // where the dashboard's Today figure didn't match the cell the business
+    // could see, with no way to tell from the UI alone whether the read
+    // itself was wrong or the number had simply moved between two glances.
+    if (isToday) {
+      diagnostics.push({
+        metric: "dailyTable.today",
+        label: "today's row",
+        resolvedVia: "label",
+        sourceCell: `row ${r + 1}, day column = ${dayRaw}, pretax column raw = "${row[header.columnMap.pretax] ?? ""}"`,
+      });
+    }
+
     results.push({
       date: isoDateForDay(dayOfMonth),
       dayOfMonth,
