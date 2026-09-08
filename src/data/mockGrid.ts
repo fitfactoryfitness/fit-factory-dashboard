@@ -26,11 +26,14 @@ export function buildMockJulGrid(): SheetGrid {
     "TRIALS", "CP TO TRIALS", "BOOKED", "SHOW", "NEW MEMBERSHIPS", "CLASS PACKS", "PT", "PSC", "PSC REV",
     "DEPOSIT", "TOTAL SALES", "REFINED REV", "UTILIZATION", "VISTS", "PSC VISITS", "PSC %", "CP VISITS",
     "CP %", "CP REV", "FROZEN", "TERMINATIONS", "REV LOST", "NO VISIT LAST 7", "BOOKED REV",
-    // Columns AG/AH/AI (index 32-34): forward MRR forecast for the next 1/2/3
-    // months. No reliable label exists for these on the live sheet, so the
-    // parser reads them by absolute column position, not by matching this
-    // text — these labels are illustrative only.
-    "MRR", "MRR +1 MO", "MRR +2 MO"
+    // Columns AH/AI/AJ (index 33-35): forward MRR forecast for the next
+    // 1/2/3 months (shifted right by one column on the live sheet as of
+    // 2026-09-08; was AG/AH/AI). No reliable label exists for these on the
+    // live sheet, so the parser reads them by absolute column position, not
+    // by matching this text — these labels are illustrative only. Index 32
+    // ("MRR") is now an unused spacer column, left over from before the
+    // shift.
+    "MRR", "MRR +1 MO", "MRR +2 MO", "MRR +3 MO"
   );
   row("DOWNTOWN", "DOWNTOWN");
 
@@ -56,13 +59,15 @@ export function buildMockJulGrid(): SheetGrid {
       day, gross.toFixed(2), (gross * 0.6).toFixed(2), "0.00", "0.00", "0.00", (gross * 1.02).toFixed(2),
       (gross * 0.75).toFixed(2), trials, cp, trials + 1, trials, day % 6 === 0 ? 1 : 0, day % 7 === 0 ? 1 : 0,
       0, 0, "$0.00", "$0.00", (gross * 1.05).toFixed(2), (gross * 0.7).toFixed(2), "68%", day % 9 === 0 ? "" : 45 + day,
-      0, "0%", 2, "10%", "$0.00", 0, day === 11 ? 1 : 0, "$0.00", 0, day === 19 ? "24,305.00" : "0.00", 51000 + day * 10,
-      // MRR +1/+2 mo forecast columns: blank until first posted, mirroring
+      0, "0%", 2, "10%", "$0.00", 0, day === 11 ? 1 : 0, "$0.00", 0, day === 19 ? "24,305.00" : "0.00",
+      "", // unused spacer column (formerly the forecast base before the AG->AH shift)
+      // MRR +1/+2/+3 mo forecast columns: blank until first posted, mirroring
       // how these running snapshots behave on the live sheet (only the
       // LATEST posted value is used for the headline figure). Day 18's entry
       // is included too, purely so the mock exercises the day-over-day trend
-      // arrow in both directions (+2 mo trends up here, +3 mo trends down) —
+      // arrow in both directions (+1/+2 mo trend up here, +3 mo trends down) —
       // day 19 stays the values the smoke test asserts on.
+      day === 19 ? "55200.00" : day === 18 ? "55150.00" : "",
       day === 19 ? "58200.00" : day === 18 ? "58150.00" : "",
       day === 19 ? "61500.00" : day === 18 ? "61550.00" : ""
     );
@@ -73,8 +78,8 @@ export function buildMockJulGrid(): SheetGrid {
   // Spreadsheet's own MONTHLY TOTALS / TOTALS row for Downtown. Per strict
   // read-only policy, this is the ONLY source for monthly figures — nothing
   // is summed from the daily rows above. Column positions match the header
-  // row (index 0 = DAY ... index 34 = AI/MRR +2 mo); named here for clarity.
-  const totalsRow = new Array(35).fill("");
+  // row (index 0 = DAY ... index 35 = AJ/MRR +3 mo); named here for clarity.
+  const totalsRow = new Array(36).fill("");
   totalsRow[0] = "TOTALS";
   totalsRow[7] = "52785.61"; // PRETAX total = Revenue MTD (matches H47 in the live sheet)
   totalsRow[8] = 33; // TRIALS
@@ -135,7 +140,7 @@ export function buildMockGridForMonth(monthTab: string, year: number): SheetGrid
     "TRIALS", "CP TO TRIALS", "BOOKED", "SHOW", "NEW MEMBERSHIPS", "CLASS PACKS", "PT", "PSC", "PSC REV",
     "DEPOSIT", "TOTAL SALES", "REFINED REV", "UTILIZATION", "VISTS", "PSC VISITS", "PSC %", "CP VISITS",
     "CP %", "CP REV", "FROZEN", "TERMINATIONS", "REV LOST", "NO VISIT LAST 7", "BOOKED REV",
-    "MRR", "MRR +1 MO", "MRR +2 MO"
+    "MRR", "MRR +1 MO", "MRR +2 MO", "MRR +3 MO"
   );
   row("DOWNTOWN", "DOWNTOWN");
 
@@ -173,12 +178,15 @@ export function buildMockGridForMonth(monthTab: string, year: number): SheetGrid
       day, gross.toFixed(2), (gross * 0.6).toFixed(2), "0.00", "0.00", "0.00", (gross * 1.02).toFixed(2),
       pretax.toFixed(2), trials, cp, trials + 1, trials, newMemberships, 0,
       0, psc, pscRev.toFixed(2), "$0.00", totalSalesDay, (gross * 1.05).toFixed(2), (gross * 0.7).toFixed(2),
-      `${65 + (day % 10)}%`, 45 + day, 0, "0%", 2, "10%", "$0.00", 0, termination, "$0.00", 0, "0.00", 51000 + day * 10,
-      (58000 + day * 10 + monthIndex * 500).toFixed(2), (61000 + day * 10 + monthIndex * 500).toFixed(2)
+      `${65 + (day % 10)}%`, 45 + day, 0, "0%", 2, "10%", "$0.00", 0, termination, "$0.00", 0, "0.00",
+      "", // unused spacer column (formerly the forecast base before the AG->AH shift)
+      (55000 + day * 10 + monthIndex * 500).toFixed(2),
+      (58000 + day * 10 + monthIndex * 500).toFixed(2),
+      (61000 + day * 10 + monthIndex * 500).toFixed(2)
     );
   }
 
-  const totalsRow = new Array(35).fill("");
+  const totalsRow = new Array(36).fill("");
   totalsRow[0] = "TOTALS";
   totalsRow[7] = revenueSum.toFixed(2);
   totalsRow[8] = trialsSum;

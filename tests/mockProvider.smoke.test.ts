@@ -34,7 +34,7 @@ describe("MockDashboardProvider — end-to-end sanity check (strict read-only po
     expect(payload.summary.revenueLostMTD).toBeNull();
   });
 
-  it("reads PSC totals (P47/Q47) and the forward MRR forecast (AG/AH/AI), both confirmed-cell direct reads", async () => {
+  it("reads PSC totals (P47/Q47) and the forward MRR forecast (AH/AI/AJ), both confirmed-cell direct reads", async () => {
     const provider = new MockDashboardProvider();
     const payload = await provider.fetchDashboard(new Date(Date.UTC(2026, 6, 20, 16)));
     expect(payload.summary.pscMTD).toBe(4);
@@ -42,7 +42,7 @@ describe("MockDashboardProvider — end-to-end sanity check (strict read-only po
 
     // Latest posted value in each forecast column — not summed, not
     // recalculated, just the last non-blank entry read directly.
-    expect(payload.summary.mrrForecast.plus1).toBeCloseTo(51190, 2); // day 19's own MRR column value
+    expect(payload.summary.mrrForecast.plus1).toBeCloseTo(55200, 2);
     expect(payload.summary.mrrForecast.plus2).toBeCloseTo(58200, 2);
     expect(payload.summary.mrrForecast.plus3).toBeCloseTo(61500, 2);
   });

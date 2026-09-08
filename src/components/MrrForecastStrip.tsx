@@ -1,7 +1,7 @@
 import { fmtCurrency } from "@/lib/format";
 
 // Forward MRR forecast — three values read directly from the spreadsheet's
-// own confirmed columns (AG/AH/AI: next 1/2/3 months), no calculation. Bar
+// own confirmed columns (AH/AI/AJ: next 1/2/3 months), no calculation. Bar
 // widths are each value's share of the $100k MRR target (business rule
 // supplied by ownership, not a spreadsheet cell) — 100% width = $100k,
 // capped at 100% if a forecast value ever exceeds it — not a proportion of

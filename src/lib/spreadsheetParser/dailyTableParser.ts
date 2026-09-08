@@ -498,9 +498,12 @@ export function parseDailyTable(
     );
   }
 
-  // Forward MRR forecast (AG/AH/AI) — absolute-column reads, independent of
+  // Forward MRR forecast — absolute-column reads (see MRR_FORECAST_COLUMNS
+  // in config/fallbackCells.ts for the current column letters; these have
+  // moved before, e.g. AG/AH/AI -> AH/AI/AJ on 2026-09-08), independent of
   // the TOTALS row entirely, since these are running snapshots rather than
   // monthly totals (see latestValueInColumn's doc comment above).
+  const mrrColRefs = `${MRR_FORECAST_COLUMNS.plus1.ref}/${MRR_FORECAST_COLUMNS.plus2.ref}/${MRR_FORECAST_COLUMNS.plus3.ref}`;
   const plus1Snapshot = latestTwoValuesInColumn(grid, start, end, MRR_FORECAST_COLUMNS.plus1.col);
   const plus2Snapshot = latestTwoValuesInColumn(grid, start, end, MRR_FORECAST_COLUMNS.plus2.col);
   const plus3Snapshot = latestTwoValuesInColumn(grid, start, end, MRR_FORECAST_COLUMNS.plus3.col);
@@ -514,10 +517,10 @@ export function parseDailyTable(
   };
   diagnostics.push({
     metric: "mrrForecast",
-    label: "MRR forecast (AG/AH/AI)",
+    label: `MRR forecast (${mrrColRefs})`,
     resolvedVia: "fallback",
-    sourceCell: "AG/AH/AI",
-    warning: `Latest posted value read directly from confirmed columns AG, AH, AI (no label match attempted). Found: ${
+    sourceCell: mrrColRefs,
+    warning: `Latest posted value read directly from confirmed columns ${mrrColRefs} (no label match attempted). Found: ${
       [mrrForecast.plus1, mrrForecast.plus2, mrrForecast.plus3].filter((v) => v !== null).length
     }/3.`,
   });

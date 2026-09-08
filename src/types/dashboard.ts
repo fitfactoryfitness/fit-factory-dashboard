@@ -64,7 +64,7 @@ export type MonthlySummary = {
   pscRevMTD: number | null;
 
   // Forward MRR forecast (no spreadsheet label; read from confirmed
-  // absolute columns AG/AH/AI — see PSC_TOTALS_FALLBACK/MRR_FORECAST_COLUMNS
+  // absolute columns AH/AI/AJ — see PSC_TOTALS_FALLBACK/MRR_FORECAST_COLUMNS
   // in config/fallbackCells.ts and dailyTableParser.ts for provenance).
   // Each also carries the most recent DIFFERENT value previously posted in
   // that same column (skipping any run of unchanged re-entries), so the UI

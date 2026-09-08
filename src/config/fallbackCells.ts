@@ -29,14 +29,16 @@ export const PSC_TOTALS_FALLBACK = {
   pscRevColumn: { col: 16, ref: "Q" },
 };
 
-// Forward MRR forecast columns: confirmed directly by the business (AG, AH,
-// AI = MRR forecast for the next 1/2/3 months respectively) on the live JUL
-// tab. These have no reliable label to match on, so they're read by
-// absolute column position rather than label search — the "latest value"
-// is the last non-blank cell found in that column across the daily rows,
-// the same running-snapshot pattern already used for NO VISIT LAST 7.
+// Forward MRR forecast columns: confirmed directly by the business (AH, AI,
+// AJ = MRR forecast for the next 1/2/3 months respectively) — updated
+// 2026-09-08 after the business shifted these columns over by one on the
+// live sheet (previously AG/AH/AI). These have no reliable label to match
+// on, so they're read by absolute column position rather than label search
+// — the "latest value" is the last non-blank cell found in that column
+// across the daily rows, the same running-snapshot pattern already used for
+// NO VISIT LAST 7.
 export const MRR_FORECAST_COLUMNS = {
-  plus1: { col: 32, ref: "AG" },
-  plus2: { col: 33, ref: "AH" },
-  plus3: { col: 34, ref: "AI" },
+  plus1: { col: 33, ref: "AH" },
+  plus2: { col: 34, ref: "AI" },
+  plus3: { col: 35, ref: "AJ" },
 };
